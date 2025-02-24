@@ -2977,7 +2977,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vueuse/core@npm:12.7.0, @vueuse/core@npm:^12.4.0":
+"@vueuse/core@npm:12.7.0, @vueuse/core@npm:^12.4.0, @vueuse/core@npm:^12.7.0":
   version: 12.7.0
   resolution: "@vueuse/core@npm:12.7.0"
   dependencies:
@@ -3052,6 +3052,21 @@ __metadata:
   version: 12.7.0
   resolution: "@vueuse/metadata@npm:12.7.0"
   checksum: 10/60d40c49c2163aa95920a8d916dfad6712338a432936168cf1127a436ffa202831bd94bdc1ebd3f61248c423fcdd88b82ba5ee7315d3af7b6a6e3319303c2fb5
+  languageName: node
+  linkType: hard
+
+"@vueuse/nuxt@npm:^12.7.0":
+  version: 12.7.0
+  resolution: "@vueuse/nuxt@npm:12.7.0"
+  dependencies:
+    "@nuxt/kit": "npm:^3.15.4"
+    "@vueuse/core": "npm:12.7.0"
+    "@vueuse/metadata": "npm:12.7.0"
+    local-pkg: "npm:^1.0.0"
+    vue: "npm:^3.5.13"
+  peerDependencies:
+    nuxt: ^3.0.0
+  checksum: 10/ca93c5ea1c3a1d5ea0e745473e7da77438fbcc9b07a9d80609216b12c1906f999a7c77c7b770f525fc02fb8f2414eac1a7f518df17cb906b24580ee2d5313ffa
   languageName: node
   linkType: hard
 
@@ -8556,6 +8571,8 @@ __metadata:
     "@types/html-escaper": "npm:^3.0.2"
     "@typescript-eslint/eslint-plugin": "npm:8.24.1"
     "@typescript-eslint/parser": "npm:8.24.1"
+    "@vueuse/core": "npm:^12.7.0"
+    "@vueuse/nuxt": "npm:^12.7.0"
     eslint: "npm:^8.57.0"
     husky: "npm:^9.1.7"
     lint-staged: "npm:^15.4.3"

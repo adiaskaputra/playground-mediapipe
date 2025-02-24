@@ -10,7 +10,12 @@ export default defineNuxtConfig({
     'nuxt-security',
     '@nuxt/eslint',
     '@nuxt/ui',
+    '@vueuse/nuxt',
   ],
+  components: {
+    global: true,
+    dirs: ['~/components'],
+  },
   imports: {
     dirs: ['composables/**'],
   },
@@ -19,7 +24,7 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
-      title: 'Playground Nuxt UI 2',
+      title: 'Playground Mediapipe',
       link: [{ rel: 'icon', type: 'image/ico', href: '/favicon.svg' }],
       meta: [
         {
@@ -36,6 +41,9 @@ export default defineNuxtConfig({
     },
   },
   css: ['~/assets/css/transition.css', '~/assets/css/main.css'],
+  colorMode: {
+    preference: 'system', // [ system, dark, light, sepia ]
+  },
   runtimeConfig: {
     apiBaseUrl: '',
   },
@@ -87,7 +95,7 @@ export default defineNuxtConfig({
           '\'unsafe-inline\'', // Recommended default for most Nuxt apps
         ],
         'base-uri': ['\'none\''],
-        'img-src': ['\'self\'', 'data:'], // Add relevant https://... sources if you load images from external sources
+        'img-src': ['\'self\'', 'data:', 'avatars.githubusercontent.com'], // Add relevant https://... sources if you load images from external sources
         'font-src': ['\'self\'', 'fonts.gstatic.com'],
         'object-src': ['\'none\''],
         'script-src-attr': ['\'none\''],
