@@ -19,6 +19,7 @@
 <style lang="postcss" scoped>
 .box {
   @apply rounded-lg p-6;
+  @apply bg-gray-100;
 
   &__title {
     @apply text-lg font-semibold text-center mb-2;

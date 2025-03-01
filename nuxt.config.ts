@@ -1,4 +1,8 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
+import path from 'pathe'
+
+// eslint-disable-next-line unicorn/prefer-module
+const tasksVisionDir = path.dirname(require.resolve('@mediapipe/tasks-vision'))
+
 export default defineNuxtConfig({
   modules: [
     [
@@ -7,7 +11,6 @@ export default defineNuxtConfig({
         autoImports: ['defineStore', 'storeToRefs'],
       },
     ],
-    'nuxt-security',
     '@nuxt/eslint',
     '@nuxt/ui',
     '@vueuse/nuxt',
@@ -40,7 +43,7 @@ export default defineNuxtConfig({
       ],
     },
   },
-  css: ['~/assets/css/transition.css', '~/assets/css/main.css'],
+  css: ['~/assets/css/transition.css', '~/assets/css/main.postcss'],
   colorMode: {
     preference: 'system', // [ system, dark, light, sepia ]
   },
@@ -51,6 +54,15 @@ export default defineNuxtConfig({
     port: 8000,
   },
   compatibilityDate: '2025-11-01',
+  nitro: {
+    publicAssets: [
+      {
+        baseURL: '/tasks-vision',
+        dir: tasksVisionDir,
+        maxAge: 60 * 60 * 24 * 30,
+      },
+    ],
+  },
   typescript: {
     tsConfig: {
       compilerOptions: {
@@ -75,36 +87,6 @@ export default defineNuxtConfig({
   icon: {
     serverBundle: {
       collections: ['uil'],
-    },
-  },
-  security: {
-    nonce: true,
-    rateLimiter: false,
-    csrf: true,
-    headers: {
-      contentSecurityPolicy: {
-        'script-src': [
-          '\'self\'', // Fallback value, will be ignored by most modern browsers (level 3)
-          '\'unsafe-inline\'', // Fallback value, will be ignored by almost any browser (level 2)
-          '\'strict-dynamic\'', // Strict CSP via 'strict-dynamic', supported by most modern browsers (level 3)
-          '\'nonce-{{nonce}}\'', // Enables CSP nonce support for scripts in SSR mode, supported by almost any browser (level 2)
-        ],
-        'style-src': [
-          '\'self\'', // Enables loading of stylesheets hosted on same origin
-          'fonts.googleapis.com',
-          '\'unsafe-inline\'', // Recommended default for most Nuxt apps
-        ],
-        'base-uri': ['\'none\''],
-        'img-src': ['\'self\'', 'data:', 'avatars.githubusercontent.com'], // Add relevant https://... sources if you load images from external sources
-        'font-src': ['\'self\'', 'fonts.gstatic.com'],
-        'object-src': ['\'none\''],
-        'script-src-attr': ['\'none\''],
-        'frame-ancestors': ['\'self\''],
-        'upgrade-insecure-requests': true,
-      },
-      permissionsPolicy: {
-        camera: ['self'],
-      },
     },
   },
 })
