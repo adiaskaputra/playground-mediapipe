@@ -62,6 +62,7 @@ async function handleClick(event) {
   displayImageDetections(detections, event.target)
 }
 function displayImageDetections(result, resultElement) {
+  console.log('result', result)
   const ratio = resultElement.height / resultElement.naturalHeight
   console.log(ratio)
   for (let detection of result.detections) {

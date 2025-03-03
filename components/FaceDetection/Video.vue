@@ -4,12 +4,13 @@ import { FaceDetector, FilesetResolver } from '@mediapipe/tasks-vision'
 let faceDetector
 let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
 
-const isRenderCamera = ref(true)
 const RefVidContainer = ref()
 const RefVideo = ref()
 
+const isRenderCamera = ref(true)
 const isCameraLive = ref(false)
 const isInProgressStopFaceDetection = ref(false)
+const loading = ref(false)
 
 let children: any = []
 let lastVideoTime = -1
@@ -53,9 +54,9 @@ function drawMasking(detections) {
         + 'width: '
         + (detection.boundingBox.width - 10)
         + 'px;'
-        + 'height: '
-        + detection.boundingBox.height
-        + 'px;'
+      + 'height: '
+      + detection.boundingBox.height
+      + 'px;'
 
     RefVidContainer.value.appendChild(highlighter)
     RefVidContainer.value.appendChild(p)
@@ -96,6 +97,7 @@ async function runMachine() {
 }
 
 async function closeCam(event) {
+  loading.value = true
   isInProgressStopFaceDetection.value = true
   await $delay(500)
 
@@ -113,6 +115,7 @@ async function closeCam(event) {
     isRenderCamera.value = false
     nextTick(() => {
       isRenderCamera.value = true
+      loading.value = false
     })
   })
 }
@@ -123,6 +126,7 @@ async function openCam(event) {
     return
   }
 
+  loading.value = true
   const constraints = { video: true }
 
   navigator.mediaDevices
@@ -133,9 +137,11 @@ async function openCam(event) {
         isCameraLive.value = true
         runMachine()
       })
+      loading.value = false
     })
     .catch((err) => {
       isCameraLive.value = false
+      loading.value = false
       console.error(err)
     })
 }
@@ -168,9 +174,15 @@ onMounted(() => {
         v-if="isCameraLive"
         label="Close camera"
         color="red"
+        :loading="loading"
         @click.stop="closeCam"
       />
-      <UButton v-else label="Open camera" @click.stop="openCam" />
+      <UButton
+        v-else
+        label="Open camera"
+        :loading="loading"
+        @click.stop="openCam"
+      />
     </div>
     <div v-if="isRenderCamera" ref="RefVidContainer" class="video-container">
       <video ref="RefVideo" autoplay playsinline></video>

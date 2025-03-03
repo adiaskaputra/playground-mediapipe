@@ -11,21 +11,25 @@ const menus = shallowRef<IMenu[]>([
     path: 'face-landmark',
   },
   {
-    label: 'Pose Landmark Detection',
-    path: 'pose-landmarker-detection',
+    label: 'Image Classification',
+    path: 'image-classification',
   },
-  {
-    label: 'Face Stylization',
-    path: 'face-stylization',
-  },
-  {
-    label: 'Hand Gesture Recognization',
-    path: 'hand-gesture-recognization',
-  },
-  {
-    label: 'Object Detection',
-    path: 'object-detection',
-  },
+  // {
+  //   label: "Object Detection",
+  //   path: "object-detection",
+  // },
+  // {
+  //   label: "Hand Gesture Recognization",
+  //   path: "hand-gesture-recognization",
+  // },
+  // {
+  //   label: 'Pose Landmark Detection',
+  //   path: 'pose-landmark-detection',
+  // },
+  // {
+  //   label: 'Face Stylization',
+  //   path: 'face-stylization',
+  // },
 ])
 
 function redirect(item: IMenu) {

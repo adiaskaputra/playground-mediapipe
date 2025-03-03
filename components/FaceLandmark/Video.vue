@@ -9,14 +9,15 @@ let faceLandmarker
 let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
 const videoWidth = 480
 
-const RefBlendShapes = ref()
-const isRenderCamera = ref(true)
 const RefVidContainer = ref()
 const RefVideo = ref()
 const RefCanvas = ref()
+const RefBlendShapes = ref()
 
+const isRenderCamera = ref(true)
 const isCameraLive = ref(false)
 const isInProgressStopFaceDetection = ref(false)
+const loading = ref(false)
 
 function drawMasking(blendShapes) {
   if (!blendShapes.length) {
@@ -37,6 +38,7 @@ function drawMasking(blendShapes) {
 
 async function runMachine() {
   console.log('RUN MACHINE')
+  if (isInProgressStopFaceDetection.value) return
   let lastVideoTime = -1
   let results = undefined
   const canvasCtx = RefCanvas.value.getContext('2d')
@@ -113,7 +115,8 @@ async function runMachine() {
   window.requestAnimationFrame(runMachine)
 }
 
-async function closeCam(event) {
+async function closeCam() {
+  loading.value = true
   isInProgressStopFaceDetection.value = true
   await $delay(500)
 
@@ -130,22 +133,33 @@ async function closeCam(event) {
     isRenderCamera.value = false
     nextTick(() => {
       isRenderCamera.value = true
+      loading.value = false
     })
   })
 }
 
-async function openCam(event) {
+async function openCam() {
   if (!faceLandmarker) {
     console.log('Wait! faceLandmarker not loaded yet.')
     return
   }
 
+  loading.value = true
   const constraints = { video: true }
 
-  navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-    RefVideo.value.srcObject = stream
-    RefVideo.value.addEventListener('loadeddata', runMachine)
-  })
+  navigator.mediaDevices
+    .getUserMedia(constraints)
+    .then((stream) => {
+      RefVideo.value.srcObject = stream
+      RefVideo.value.addEventListener('loadeddata', runMachine)
+      isCameraLive.value = true
+      loading.value = false
+    })
+    .catch((err) => {
+      isCameraLive.value = false
+      loading.value = false
+      console.error(err)
+    })
 }
 async function init() {
   const filesetResolver = await FilesetResolver.forVisionTasks(
@@ -178,9 +192,15 @@ onMounted(() => {
           v-if="isCameraLive"
           label="Close camera"
           color="red"
-          @click.stop="closeCam"
+          :loading="loading"
+          @click.stop="closeCam()"
         />
-        <UButton v-else label="Open camera" @click.stop="openCam" />
+        <UButton
+          v-else
+          label="Open camera"
+          :loading="loading"
+          @click.stop="openCam()"
+        />
       </div>
       <div
         v-if="isRenderCamera"
