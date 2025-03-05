@@ -132,7 +132,7 @@ function displayImageDetections(
         + detection.boundingBox.width * ratio
         + 'px;'
         + 'height: '
-      + detection.boundingBox.height * ratio
+        + detection.boundingBox.height * ratio
       + 'px;'
 
     resultElement.parentNode.appendChild(highlighter)
@@ -254,7 +254,7 @@ function displayVideoDetections(result: ObjectDetectionResult) {
         + 'width: '
         + (detection.boundingBox.width - 10)
         + 'px;'
-      + 'height: '
+        + 'height: '
       + detection.boundingBox.height
       + 'px;'
 

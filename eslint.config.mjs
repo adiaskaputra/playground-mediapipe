@@ -5,7 +5,6 @@ export default withNuxt([
     ignores: [
       // FOLDER
       '.devcontainer',
-      'example',
       '.nitro',
       '.nuxt',
       '.output',

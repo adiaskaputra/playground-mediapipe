@@ -17,13 +17,20 @@ limitations under the License. -->
 <section id="demos">
 
   <h2>Demo: Stylizing Images</h2>
-  <p>Select a style from the dropdown menu and click "Use style". Then <b>click on an image below</b> to see the style applied to the given face.</p>
+  <p>Select a style from the dropdown menu and click "Use style". Then <b>click on an image below</b> to see the style
+    applied to the given face.</p>
   <div id="styleDropdown">
     <label for="styleSelector">Select a Face Stylization:</label>
     <select id="styleSelector">
-      <option value="https://storage.googleapis.com/mediapipe-models/face_stylizer/blaze_face_stylizer/float32/latest/face_stylizer_oil_painting.task">Oil Painting</option>
-      <option value="https://storage.googleapis.com/mediapipe-models/face_stylizer/blaze_face_stylizer/float32/latest/face_stylizer_color_ink.task">Color Ink</option>
-      <option value="https://storage.googleapis.com/mediapipe-models/face_stylizer/blaze_face_stylizer/float32/latest/face_stylizer_color_sketch.task">Color Sketch</option>
+      <option
+        value="https://storage.googleapis.com/mediapipe-models/face_stylizer/blaze_face_stylizer/float32/latest/face_stylizer_oil_painting.task">
+        Oil Painting</option>
+      <option
+        value="https://storage.googleapis.com/mediapipe-models/face_stylizer/blaze_face_stylizer/float32/latest/face_stylizer_color_ink.task">
+        Color Ink</option>
+      <option
+        value="https://storage.googleapis.com/mediapipe-models/face_stylizer/blaze_face_stylizer/float32/latest/face_stylizer_color_sketch.task">
+        Color Sketch</option>
     </select>
     <button id="changeStyle" class="mdc-button mdc-button--raised">
       <span class="mdc-button__ripple"></span>
@@ -31,14 +38,17 @@ limitations under the License. -->
     </button>
   </div>
   <div class="stylizeOnClick">
-    <img src="https://storage.googleapis.com/mediapipe-assets/portrait.jpg" width="100%" crossorigin="anonymous" title="Click to get detection!" />
+    <img src="https://storage.googleapis.com/mediapipe-assets/portrait.jpg" width="100%" crossorigin="anonymous"
+      title="Click to get detection!" />
   </div>
   <div class="stylizeOnClick">
-    <img src="https://assets.codepen.io/9177687/female-4572747_640.jpg" width="100%" crossorigin="anonymous" title="Click to get detection!" />
+    <img src="https://assets.codepen.io/9177687/female-4572747_640.jpg" width="100%" crossorigin="anonymous"
+      title="Click to get detection!" />
   </div>
 
   <h2>Demo: Webcam face stylizer detection</h2>
-  <p>Hold your face in front of your webcam, then click <b>Pause and stylize</b> to pause and trigger face stylization.</br>Click <b>enable webcam</b> below and grant access to the webcam if prompted.</p>
+  <p>Hold your face in front of your webcam, then click <b>Pause and stylize</b> to pause and trigger face
+    stylization.</br>Click <b>enable webcam</b> below and grant access to the webcam if prompted.</p>
 
   <div id="liveView" class="videoView">
     <button id="webcamButton" class="mdc-button mdc-button--raised">

@@ -289,11 +289,9 @@ function drawBlendShapes(el: HTMLElement, blendShapes: any[]) {
   blendShapes[0].categories.map((shape) => {
     htmlMaker += `
       <li class="blend-shapes-item">
-        <span class="blend-shapes-label">${
-          shape.displayName || shape.categoryName
+        <span class="blend-shapes-label">${shape.displayName || shape.categoryName
         }</span>
-        <span class="blend-shapes-value" style="width: calc(${
-          +shape.score * 100
+        <span class="blend-shapes-value" style="width: calc(${+shape.score * 100
         }% - 120px)">${(+shape.score).toFixed(4)}</span>
       </li>
     `

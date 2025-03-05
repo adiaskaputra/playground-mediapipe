@@ -54,9 +54,9 @@ function drawMasking(detections) {
         + 'width: '
         + (detection.boundingBox.width - 10)
         + 'px;'
-      + 'height: '
-      + detection.boundingBox.height
-      + 'px;'
+        + 'height: '
+        + detection.boundingBox.height
+        + 'px;'
 
     RefVidContainer.value.appendChild(highlighter)
     RefVidContainer.value.appendChild(p)
@@ -153,7 +153,7 @@ async function init() {
   const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
   faceDetector = await FaceDetector.createFromOptions(vision, {
     baseOptions: {
-      modelAssetPath: '/models/blaze_face_short_range.tflite',
+      modelAssetPath: '/models/blaze_face_short_range.tflite', // BlazeFace (short-range) float16
       delegate: 'GPU',
     },
     runningMode,

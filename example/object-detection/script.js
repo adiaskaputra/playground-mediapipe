@@ -8,14 +8,19 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { ObjectDetector, FilesetResolver } from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.2'
+import {
+  ObjectDetector,
+  FilesetResolver,
+} from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.2'
 
 const demosSection = document.getElementById('demos')
 let objectDetector
 let runningMode = 'IMAGE'
 // Initialize the object detector
 const initializeObjectDetector = async () => {
-  const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.2/wasm')
+  const vision = await FilesetResolver.forVisionTasks(
+    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.2/wasm',
+  )
   objectDetector = await ObjectDetector.createFromOptions(vision, {
     baseOptions: {
       modelAssetPath: `https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite`,
@@ -39,7 +44,8 @@ for (let imageContainer of imageContainers) {
  * Detect objects in still images on click
  */
 async function handleClick(event) {
-  const highlighters = event.target.parentNode.getElementsByClassName('highlighter')
+  const highlighters
+    = event.target.parentNode.getElementsByClassName('highlighter')
   while (highlighters[0]) {
     highlighters[0].parentNode.removeChild(highlighters[0])
   }
@@ -70,38 +76,38 @@ function displayImageDetections(result, resultElement) {
     const p = document.createElement('p')
     p.setAttribute('class', 'info')
     p.innerText
-            = detection.categories[0].categoryName
-              + ' - with '
-              + Math.round(parseFloat(detection.categories[0].score) * 100)
-              + '% confidence.'
+      = detection.categories[0].categoryName
+        + ' - with '
+        + Math.round(parseFloat(detection.categories[0].score) * 100)
+        + '% confidence.'
     // Positioned at the top left of the bounding box.
     // Height is whatever the text takes up.
     // Width subtracts text padding in CSS so fits perfectly.
     p.style
-            = 'left: '
-              + detection.boundingBox.originX * ratio
-              + 'px;'
-              + 'top: '
-              + detection.boundingBox.originY * ratio
-              + 'px; '
-              + 'width: '
-              + (detection.boundingBox.width * ratio - 10)
-              + 'px;'
+      = 'left: '
+        + detection.boundingBox.originX * ratio
+        + 'px;'
+        + 'top: '
+        + detection.boundingBox.originY * ratio
+        + 'px; '
+        + 'width: '
+        + (detection.boundingBox.width * ratio - 10)
+        + 'px;'
     const highlighter = document.createElement('div')
     highlighter.setAttribute('class', 'highlighter')
     highlighter.style
-            = 'left: '
-              + detection.boundingBox.originX * ratio
-              + 'px;'
-              + 'top: '
-              + detection.boundingBox.originY * ratio
-              + 'px;'
-              + 'width: '
-              + detection.boundingBox.width * ratio
-              + 'px;'
-              + 'height: '
-                + detection.boundingBox.height * ratio
-                + 'px;'
+      = 'left: '
+        + detection.boundingBox.originX * ratio
+        + 'px;'
+        + 'top: '
+        + detection.boundingBox.originY * ratio
+        + 'px;'
+        + 'width: '
+        + detection.boundingBox.width * ratio
+        + 'px;'
+        + 'height: '
+      + detection.boundingBox.height * ratio
+      + 'px;'
     resultElement.parentNode.appendChild(highlighter)
     resultElement.parentNode.appendChild(p)
   }
@@ -179,39 +185,39 @@ function displayVideoDetections(result) {
   for (let detection of result.detections) {
     const p = document.createElement('p')
     p.innerText
-            = detection.categories[0].categoryName
-              + ' - with '
-              + Math.round(parseFloat(detection.categories[0].score) * 100)
-              + '% confidence.'
+      = detection.categories[0].categoryName
+        + ' - with '
+        + Math.round(parseFloat(detection.categories[0].score) * 100)
+        + '% confidence.'
     p.style
-            = 'left: '
-              + (video.offsetWidth
-                - detection.boundingBox.width
-                - detection.boundingBox.originX)
-              + 'px;'
-              + 'top: '
-              + detection.boundingBox.originY
-              + 'px; '
-              + 'width: '
-              + (detection.boundingBox.width - 10)
-              + 'px;'
+      = 'left: '
+        + (video.offsetWidth
+          - detection.boundingBox.width
+          - detection.boundingBox.originX)
+        + 'px;'
+        + 'top: '
+        + detection.boundingBox.originY
+        + 'px; '
+        + 'width: '
+        + (detection.boundingBox.width - 10)
+        + 'px;'
     const highlighter = document.createElement('div')
     highlighter.setAttribute('class', 'highlighter')
     highlighter.style
-            = 'left: '
-              + (video.offsetWidth
-                - detection.boundingBox.width
-                - detection.boundingBox.originX)
-              + 'px;'
-              + 'top: '
-              + detection.boundingBox.originY
-              + 'px;'
-              + 'width: '
-              + (detection.boundingBox.width - 10)
-              + 'px;'
-                  + 'height: '
-                  + detection.boundingBox.height
-                + 'px;'
+      = 'left: '
+        + (video.offsetWidth
+          - detection.boundingBox.width
+          - detection.boundingBox.originX)
+        + 'px;'
+        + 'top: '
+        + detection.boundingBox.originY
+        + 'px;'
+        + 'width: '
+        + (detection.boundingBox.width - 10)
+        + 'px;'
+      + 'height: '
+      + detection.boundingBox.height
+      + 'px;'
     liveView.appendChild(highlighter)
     liveView.appendChild(p)
     // Store drawn objects in memory so they are queued to delete at next call.

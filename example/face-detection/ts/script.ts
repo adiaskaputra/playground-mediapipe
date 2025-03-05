@@ -118,7 +118,7 @@ function displayImageDetections(detections: [], resultElement: HTMLElement) {
         + (detection.boundingBox.width * ratio - 10)
         + 'px;'
         + 'hight: '
-      + 20
+        + 20
       + 'px;'
     const highlighter = document.createElement('div')
     highlighter.setAttribute('class', 'highlighter')
@@ -133,7 +133,7 @@ function displayImageDetections(detections: [], resultElement: HTMLElement) {
         + detection.boundingBox.width * ratio
         + 'px;'
         + 'height: '
-      + detection.boundingBox.height * ratio
+        + detection.boundingBox.height * ratio
       + 'px;'
 
     resultElement.parentNode.appendChild(highlighter)
@@ -263,7 +263,7 @@ function displayVideoDetections(detections: Detection[]) {
         + 'width: '
         + (detection.boundingBox.width - 10)
         + 'px;'
-      + 'height: '
+        + 'height: '
       + detection.boundingBox.height
       + 'px;'
 

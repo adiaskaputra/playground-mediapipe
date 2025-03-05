@@ -103,7 +103,7 @@ async function init() {
   const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
   imageClassifier = await ImageClassifier.createFromOptions(vision, {
     baseOptions: {
-      modelAssetPath: '/models/efficientnet_lite0.tflite',
+      modelAssetPath: '/models/efficientnet_lite0.tflite', // float32
       delegate: 'GPU',
     },
     runningMode,

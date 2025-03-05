@@ -10,7 +10,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { PoseLandmarker, FilesetResolver, DrawingUtils } from 'https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.0'
+import {
+  PoseLandmarker,
+  FilesetResolver,
+  DrawingUtils,
+} from 'https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.0'
 
 const demosSection = document.getElementById('demos')
 let poseLandmarker = undefined
@@ -23,7 +27,9 @@ const videoWidth = '480px'
 // loading. Machine Learning models can be large and take a moment to
 // get everything needed to run.
 const createPoseLandmarker = async () => {
-  const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm')
+  const vision = await FilesetResolver.forVisionTasks(
+    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm',
+  )
   poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
     baseOptions: {
       modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task`,
@@ -72,14 +78,14 @@ async function handleClick(event) {
     canvas.setAttribute('width', event.target.naturalWidth + 'px')
     canvas.setAttribute('height', event.target.naturalHeight + 'px')
     canvas.style
-            = 'left: 0px;'
-              + 'top: 0px;'
-              + 'width: '
-              + event.target.width
-              + 'px;'
-              + 'height: '
-              + event.target.height
-              + 'px;'
+      = 'left: 0px;'
+        + 'top: 0px;'
+        + 'width: '
+        + event.target.width
+        + 'px;'
+        + 'height: '
+        + event.target.height
+        + 'px;'
     event.target.parentNode.appendChild(canvas)
     const canvasCtx = canvas.getContext('2d')
     const drawingUtils = new DrawingUtils(canvasCtx)
@@ -99,7 +105,12 @@ const canvasElement = document.getElementById('output_canvas')
 const canvasCtx = canvasElement.getContext('2d')
 const drawingUtils = new DrawingUtils(canvasCtx)
 // Check if webcam access is supported.
-const hasGetUserMedia = () => { var _a; return !!((_a = navigator.mediaDevices) === null || _a === void 0 ? void 0 : _a.getUserMedia) }
+const hasGetUserMedia = () => {
+  var _a
+  return !!((_a = navigator.mediaDevices) === null || _a === void 0
+    ? void 0
+    : _a.getUserMedia)
+}
 // If webcam supported, add event listener to button for when user
 // wants to activate it.
 if (hasGetUserMedia()) {

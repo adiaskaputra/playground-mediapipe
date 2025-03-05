@@ -8,7 +8,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { FaceStylizer, FilesetResolver } from 'https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.6'
+import {
+  FaceStylizer,
+  FilesetResolver,
+} from 'https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.6'
 
 const demosSection = document.getElementById('demos')
 let faceStylizer
@@ -27,7 +30,9 @@ async function createFaceStylizer() {
   if (faceStylizer !== undefined) {
     faceStylizer.close()
   }
-  const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.6/wasm')
+  const vision = await FilesetResolver.forVisionTasks(
+    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.6/wasm',
+  )
   faceStylizer = await FaceStylizer.createFromOptions(vision, {
     baseOptions: {
       modelAssetPath: selectedOption,
