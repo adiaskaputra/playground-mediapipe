@@ -18,10 +18,10 @@ const menus = shallowRef<IMenu[]>([
   //   label: "Object Detection",
   //   path: "object-detection",
   // },
-  // {
-  //   label: "Hand Gesture Recognization",
-  //   path: "hand-gesture-recognization",
-  // },
+  {
+    label: 'Hand Gesture Recognization',
+    path: 'hand-gesture-recognization',
+  },
   // {
   //   label: 'Pose Landmark Detection',
   //   path: 'pose-landmark-detection',
