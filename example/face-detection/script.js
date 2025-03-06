@@ -96,8 +96,8 @@ function displayImageDetections(detections, resultElement) {
         + (detection.boundingBox.width * ratio - 10)
         + 'px;'
         + 'hight: '
-      + 20
-      + 'px;'
+        + 20
+        + 'px;'
     const highlighter = document.createElement('div')
     highlighter.setAttribute('class', 'highlighter')
     highlighter.style
@@ -111,8 +111,8 @@ function displayImageDetections(detections, resultElement) {
         + detection.boundingBox.width * ratio
         + 'px;'
         + 'height: '
-      + detection.boundingBox.height * ratio
-      + 'px;'
+        + detection.boundingBox.height * ratio
+        + 'px;'
     resultElement.parentNode.appendChild(highlighter)
     resultElement.parentNode.appendChild(p)
     for (let keypoint of detection.keypoints) {
@@ -238,9 +238,9 @@ function displayVideoDetections(detections) {
         + 'width: '
         + (detection.boundingBox.width - 10)
         + 'px;'
-      + 'height: '
-      + detection.boundingBox.height
-      + 'px;'
+        + 'height: '
+        + detection.boundingBox.height
+        + 'px;'
     liveView.appendChild(highlighter)
     liveView.appendChild(p)
     // Store drawn objects in memory so they are queued to delete at next call

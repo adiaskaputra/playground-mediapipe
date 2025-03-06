@@ -14,102 +14,118 @@ const images = ref([
 ])
 
 function drawMasking(detections, resultElement) {
-  const ratio = resultElement.height / resultElement.naturalHeight
+  try {
+    const ratio = resultElement.height / resultElement.naturalHeight
 
-  for (const detection of detections) {
-    const p = document.createElement('p')
-    p.setAttribute('class', 'info')
-    p.innerText
-      = 'Confidence: '
-        + Math.round(parseFloat(detection.categories[0].score) * 100)
-        + '% .'
+    for (const detection of detections) {
+      const p = document.createElement('p')
+      p.setAttribute('class', 'info')
+      p.innerText
+        = 'Confidence: '
+          + Math.round(parseFloat(detection.categories[0].score) * 100)
+          + '% .'
 
-    p.style
-      = 'left: '
-        + detection.boundingBox.originX * ratio
-        + 'px;'
-        + 'top: '
-        + (detection.boundingBox.originY * ratio - 30)
-        + 'px; '
-        + 'width: '
-        + (detection.boundingBox.width * ratio - 10)
-        + 'px;'
-        + 'hight: '
-        + 20
-        + 'px;'
+      p.style
+        = 'left: '
+          + detection.boundingBox.originX * ratio
+          + 'px;'
+          + 'top: '
+          + (detection.boundingBox.originY * ratio - 30)
+          + 'px; '
+          + 'width: '
+          + (detection.boundingBox.width * ratio - 10)
+          + 'px;'
+          + 'hight: '
+          + 20
+          + 'px;'
 
-    const highlighter = document.createElement('div')
-    highlighter.setAttribute('class', 'highlighter')
-    highlighter.style
-      = 'left: '
-        + detection.boundingBox.originX * ratio
-        + 'px;'
-        + 'top: '
-        + detection.boundingBox.originY * ratio
-        + 'px;'
-        + 'width: '
-        + detection.boundingBox.width * ratio
-        + 'px;'
-        + 'height: '
-        + detection.boundingBox.height * ratio
-        + 'px;'
+      const highlighter = document.createElement('div')
+      highlighter.setAttribute('class', 'highlighter')
+      highlighter.style
+        = 'left: '
+          + detection.boundingBox.originX * ratio
+          + 'px;'
+          + 'top: '
+          + detection.boundingBox.originY * ratio
+          + 'px;'
+          + 'width: '
+          + detection.boundingBox.width * ratio
+          + 'px;'
+          + 'height: '
+          + detection.boundingBox.height * ratio
+          + 'px;'
 
-    resultElement.parentNode.appendChild(highlighter)
-    resultElement.parentNode.appendChild(p)
+      resultElement.parentNode.appendChild(highlighter)
+      resultElement.parentNode.appendChild(p)
 
-    for (const keypoint of detection.keypoints) {
-      const keypointEl = document.createElement('spam')
-      keypointEl.className = 'key-point'
-      keypointEl.style.top = `${keypoint.y * resultElement.height - 3}px`
-      keypointEl.style.left = `${keypoint.x * resultElement.width - 3}px`
-      resultElement.parentNode.appendChild(keypointEl)
+      for (const keypoint of detection.keypoints) {
+        const keypointEl = document.createElement('spam')
+        keypointEl.className = 'key-point'
+        keypointEl.style.top = `${keypoint.y * resultElement.height - 3}px`
+        keypointEl.style.left = `${keypoint.x * resultElement.width - 3}px`
+        resultElement.parentNode.appendChild(keypointEl)
+      }
     }
+  }
+  catch (err) {
+    console.info('ERR DRAW MASKING')
+    console.error(err)
   }
 }
 
 async function runMachine(event) {
-  const highlighters
-    = event.target.parentNode.getElementsByClassName('highlighter')
-  while (highlighters[0]) {
-    highlighters[0].parentNode.removeChild(highlighters[0])
-  }
+  try {
+    const highlighters
+      = event.target.parentNode.getElementsByClassName('highlighter')
+    while (highlighters[0]) {
+      highlighters[0].parentNode.removeChild(highlighters[0])
+    }
 
-  const infos = event.target.parentNode.getElementsByClassName('info')
-  while (infos[0]) {
-    infos[0].parentNode.removeChild(infos[0])
-  }
+    const infos = event.target.parentNode.getElementsByClassName('info')
+    while (infos[0]) {
+      infos[0].parentNode.removeChild(infos[0])
+    }
 
-  const keyPoints = event.target.parentNode.getElementsByClassName('key-point')
-  while (keyPoints[0]) {
-    keyPoints[0].parentNode.removeChild(keyPoints[0])
-  }
+    const keyPoints
+      = event.target.parentNode.getElementsByClassName('key-point')
+    while (keyPoints[0]) {
+      keyPoints[0].parentNode.removeChild(keyPoints[0])
+    }
 
-  if (!faceDetector) {
-    console.log('Wait for objectDetector to load before clicking')
-    return
-  }
-  if (runningMode === 'VIDEO') {
-    runningMode = 'IMAGE'
-    await faceDetector.setOptions({ runningMode: 'IMAGE' })
-  }
+    if (!faceDetector) {
+      alert('Wait for objectDetector to load before clicking')
+      return
+    }
+    if (runningMode === 'VIDEO') {
+      runningMode = 'IMAGE'
+      await faceDetector.setOptions({ runningMode: 'IMAGE' })
+    }
 
-  // const ratio = event.target.height / event.target.naturalHeight;
-  const detections = faceDetector.detect(event.target).detections
-  drawMasking(detections, event.target)
+    // const ratio = event.target.height / event.target.naturalHeight;
+    const detections = faceDetector.detect(event.target).detections
+    drawMasking(detections, event.target)
+  }
+  catch (err) {
+    console.info('ERR RUN MACHINE')
+    console.error(err)
+  }
 }
 
-//
-//  I N I T I A L I Z A T I O N
-//
 async function init() {
-  const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
-  faceDetector = await FaceDetector.createFromOptions(vision, {
-    baseOptions: {
-      modelAssetPath: '/models/blaze_face_short_range.tflite', // BlazeFace (short-range) float16
-      delegate: 'GPU',
-    },
-    runningMode,
-  })
+  try {
+    const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
+    faceDetector = await FaceDetector.createFromOptions(vision, {
+      baseOptions: {
+        modelAssetPath: '/models/blaze_face_short_range.tflite', // BlazeFace (short-range) float16
+        delegate: 'GPU',
+      },
+      runningMode,
+    })
+  }
+  catch (err) {
+    console.info('ERR INIT')
+    console.error(err)
+  }
 }
 
 onMounted(() => {

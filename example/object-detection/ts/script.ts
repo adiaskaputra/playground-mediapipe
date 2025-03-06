@@ -133,7 +133,7 @@ function displayImageDetections(
         + 'px;'
         + 'height: '
         + detection.boundingBox.height * ratio
-      + 'px;'
+        + 'px;'
 
     resultElement.parentNode.appendChild(highlighter)
     resultElement.parentNode.appendChild(p)
@@ -255,8 +255,8 @@ function displayVideoDetections(result: ObjectDetectionResult) {
         + (detection.boundingBox.width - 10)
         + 'px;'
         + 'height: '
-      + detection.boundingBox.height
-      + 'px;'
+        + detection.boundingBox.height
+        + 'px;'
 
     liveView.appendChild(highlighter)
     liveView.appendChild(p)

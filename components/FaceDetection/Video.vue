@@ -16,111 +16,135 @@ let children: any = []
 let lastVideoTime = -1
 
 function drawMasking(detections) {
-  for (const child of children) {
-    RefVidContainer.value.removeChild(child)
-  }
-  children.splice(0)
-
-  for (const detection of detections) {
-    const p = document.createElement('p')
-    p.innerText
-      = 'Confidence: '
-        + Math.round(parseFloat(detection.categories[0].score) * 100)
-        + '% .'
-    p.style
-      = 'left: '
-        + (RefVideo.value.offsetWidth
-          - detection.boundingBox.width
-          - detection.boundingBox.originX)
-        + 'px;'
-        + 'top: '
-        + (detection.boundingBox.originY - 30)
-        + 'px; '
-        + 'width: '
-        + (detection.boundingBox.width - 10)
-        + 'px;'
-
-    const highlighter = document.createElement('div')
-    highlighter.setAttribute('class', 'highlighter')
-    highlighter.style
-      = 'left: '
-        + (RefVideo.value.offsetWidth
-          - detection.boundingBox.width
-          - detection.boundingBox.originX)
-        + 'px;'
-        + 'top: '
-        + detection.boundingBox.originY
-        + 'px;'
-        + 'width: '
-        + (detection.boundingBox.width - 10)
-        + 'px;'
-        + 'height: '
-        + detection.boundingBox.height
-        + 'px;'
-
-    RefVidContainer.value.appendChild(highlighter)
-    RefVidContainer.value.appendChild(p)
-
-    children.push(highlighter)
-    children.push(p)
-    for (const keypoint of detection.keypoints) {
-      const keypointEl = document.createElement('spam')
-      keypointEl.className = 'key-point'
-      keypointEl.style.top = `${keypoint.y * RefVideo.value.offsetHeight - 3}px`
-      keypointEl.style.left = `${
-        RefVideo.value.offsetWidth - keypoint.x * RefVideo.value.offsetWidth - 3
-      }px`
-      RefVidContainer.value.appendChild(keypointEl)
-      children.push(keypointEl)
+  try {
+    for (const child of children) {
+      RefVidContainer.value.removeChild(child)
     }
+    children.splice(0)
+
+    for (const detection of detections) {
+      const p = document.createElement('p')
+      p.innerText
+        = 'Confidence: '
+          + Math.round(parseFloat(detection.categories[0].score) * 100)
+          + '% .'
+      p.style
+        = 'left: '
+          + (RefVideo.value.offsetWidth
+            - detection.boundingBox.width
+            - detection.boundingBox.originX)
+          + 'px;'
+          + 'top: '
+          + (detection.boundingBox.originY - 30)
+          + 'px; '
+          + 'width: '
+          + (detection.boundingBox.width - 10)
+          + 'px;'
+
+      const highlighter = document.createElement('div')
+      highlighter.setAttribute('class', 'highlighter')
+      highlighter.style
+        = 'left: '
+          + (RefVideo.value.offsetWidth
+            - detection.boundingBox.width
+            - detection.boundingBox.originX)
+          + 'px;'
+          + 'top: '
+          + detection.boundingBox.originY
+          + 'px;'
+          + 'width: '
+          + (detection.boundingBox.width - 10)
+          + 'px;'
+          + 'height: '
+          + detection.boundingBox.height
+          + 'px;'
+
+      RefVidContainer.value.appendChild(highlighter)
+      RefVidContainer.value.appendChild(p)
+
+      children.push(highlighter)
+      children.push(p)
+      for (const keypoint of detection.keypoints) {
+        const keypointEl = document.createElement('spam')
+        keypointEl.className = 'key-point'
+        keypointEl.style.top = `${keypoint.y * RefVideo.value.offsetHeight - 3}px`
+        keypointEl.style.left = `${
+          RefVideo.value.offsetWidth
+          - keypoint.x * RefVideo.value.offsetWidth
+          - 3
+        }px`
+        RefVidContainer.value.appendChild(keypointEl)
+        children.push(keypointEl)
+      }
+    }
+  }
+  catch (err) {
+    console.info('ERR DRAW MASKING')
+    console.error(err)
   }
 }
 
 async function runMachine() {
-  console.log('[ VIDEO ] FACE DETECTION')
-  if (isInProgressStopFaceDetection.value) return
-  if (runningMode === 'IMAGE') {
-    runningMode = 'VIDEO'
-    await faceDetector.setOptions({ runningMode: 'VIDEO' })
-  }
-  const startTimeMs = performance.now()
+  try {
+    if (isInProgressStopFaceDetection.value) return
+    if (runningMode === 'IMAGE') {
+      runningMode = 'VIDEO'
+      await faceDetector.setOptions({ runningMode: 'VIDEO' })
+    }
+    const startTimeMs = performance.now()
 
-  if (RefVideo.value.currentTime !== lastVideoTime) {
-    lastVideoTime = RefVideo.value.currentTime
-    const detections = faceDetector.detectForVideo(
-      RefVideo.value,
-      startTimeMs,
-    ).detections
-    drawMasking(detections)
+    if (RefVideo.value.currentTime !== lastVideoTime) {
+      lastVideoTime = RefVideo.value.currentTime
+      const detections = faceDetector.detectForVideo(
+        RefVideo.value,
+        startTimeMs,
+      ).detections
+      drawMasking(detections)
+    }
+    window.requestAnimationFrame(runMachine)
   }
-  window.requestAnimationFrame(runMachine)
+  catch (err) {
+    console.info('ERR RUN MACHINE')
+    console.error(err)
+  }
 }
 
-async function closeCam(event) {
-  loading.value = true
-  isInProgressStopFaceDetection.value = true
-  await $delay(500)
+async function closeCam() {
+  try {
+    if (!isCameraLive.value) return
+    loading.value = true
+    isInProgressStopFaceDetection.value = true
+    await $delay(500)
 
-  const stream = RefVideo.value.srcObject
-  const tracks = stream.getTracks()
-  tracks.forEach((track) => {
-    track.stop()
-    RefVideo.value.srcObject = null
-  })
-
-  nextTick(() => {
-    children = []
-    isCameraLive.value = false
-    isInProgressStopFaceDetection.value = false
-    isRenderCamera.value = false
-    nextTick(() => {
-      isRenderCamera.value = true
-      loading.value = false
+    const stream = RefVideo.value.srcObject
+    const tracks = stream.getTracks()
+    tracks.forEach((track) => {
+      track.stop()
+      RefVideo.value.srcObject = null
     })
-  })
+
+    nextTick(() => {
+      children = []
+      isCameraLive.value = false
+      isInProgressStopFaceDetection.value = false
+      isRenderCamera.value = false
+      nextTick(() => {
+        isRenderCamera.value = true
+        loading.value = false
+      })
+    })
+  }
+  catch (err) {
+    console.info('ERR CLOSE CAM')
+    console.error(err)
+  }
 }
 
-async function openCam(event) {
+async function openCam() {
+  if (isCameraLive.value) {
+    alert('Camera still live.')
+    return
+  }
   if (!faceDetector) {
     alert('Face Detector is still loading. Please try again..')
     return
@@ -142,28 +166,36 @@ async function openCam(event) {
     .catch((err) => {
       isCameraLive.value = false
       loading.value = false
+      console.info('ERR OPEN CAM')
       console.error(err)
     })
 }
 
-//
-//  I N I T I A L I Z A T I O N
-//
 async function init() {
-  const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
-  faceDetector = await FaceDetector.createFromOptions(vision, {
-    baseOptions: {
-      modelAssetPath: '/models/blaze_face_short_range.tflite', // BlazeFace (short-range) float16
-      delegate: 'GPU',
-    },
-    runningMode,
-  })
+  try {
+    const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
+    faceDetector = await FaceDetector.createFromOptions(vision, {
+      baseOptions: {
+        modelAssetPath: '/models/blaze_face_short_range.tflite', // BlazeFace (short-range) float16
+        delegate: 'GPU',
+      },
+      runningMode,
+    })
+  }
+  catch (err) {
+    console.info('ERR INIT')
+    console.error(err)
+  }
 }
 
 onMounted(() => {
   nextTick(() => {
     init()
   })
+})
+
+onBeforeRouteLeave(async () => {
+  await closeCam()
 })
 </script>
 

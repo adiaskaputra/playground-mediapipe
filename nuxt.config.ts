@@ -45,7 +45,7 @@ export default defineNuxtConfig({
   },
   css: ['~/assets/css/transition.css', '~/assets/css/main.postcss'],
   colorMode: {
-    preference: 'system', // [ system, dark, light, sepia ]
+    preference: 'light', // [ system, dark, light, sepia ]
   },
   runtimeConfig: {
     apiBaseUrl: '',
@@ -62,6 +62,11 @@ export default defineNuxtConfig({
         maxAge: 60 * 60 * 24 * 30,
       },
     ],
+    prerender: {
+      crawlLinks: false,
+      ignore: [],
+      routes: [],
+    },
   },
   typescript: {
     tsConfig: {

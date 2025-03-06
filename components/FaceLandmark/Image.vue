@@ -10,116 +10,133 @@ let faceLandmarker
 let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
 
 function drawMasking(blendShapes) {
-  if (!blendShapes.length) {
-    return
+  try {
+    if (!blendShapes.length) return
+
+    let htmlMaker = ''
+    blendShapes[0].categories.map((shape) => {
+      htmlMaker += `
+    <li class="blend-shapes__item">
+      <span class="blend-shapes__label">${shape.displayName || shape.categoryName}</span>
+      <span class="blend-shapes__value" style="width: calc(${+shape.score * 100}% - 120px)">${(+shape.score).toFixed(4)}</span>
+    </li>
+  `
+    })
+    RefBlendShapes.value.innerHTML = htmlMaker
   }
-  console.log('blendShapes[0]', blendShapes[0])
-  let htmlMaker = ''
-  blendShapes[0].categories.map((shape) => {
-    htmlMaker += `
-      <li class="blend-shapes__item">
-        <span class="blend-shapes__label">${shape.displayName || shape.categoryName}</span>
-        <span class="blend-shapes__value" style="width: calc(${+shape.score * 100}% - 120px)">${(+shape.score).toFixed(4)}</span>
-      </li>
-    `
-  })
-  RefBlendShapes.value.innerHTML = htmlMaker
+  catch (err) {
+    console.info('ERR DRAW MASKING')
+    console.error(err)
+  }
 }
 
 async function runMachine(event) {
-  console.log('RUN MACHINE')
+  try {
+    if (!faceLandmarker) {
+      alert('Wait for faceLandmarker to load before clicking!')
+      return
+    }
+    if (runningMode === 'VIDEO') {
+      runningMode = 'IMAGE'
+      await faceLandmarker.setOptions({ runningMode })
+    }
 
-  if (!faceLandmarker) {
-    console.log('Wait for faceLandmarker to load before clicking!')
-    return
-  }
-  if (runningMode === 'VIDEO') {
-    runningMode = 'IMAGE'
-    await faceLandmarker.setOptions({ runningMode })
-  }
+    const allCanvas = event.target.parentNode.getElementsByClassName('canvas')
+    for (let i = allCanvas.length - 1; i >= 0; i--) {
+      const n = allCanvas[i]
+      n.parentNode.removeChild(n)
+    }
 
-  const allCanvas = event.target.parentNode.getElementsByClassName('canvas')
-  for (let i = allCanvas.length - 1; i >= 0; i--) {
-    const n = allCanvas[i]
-    n.parentNode.removeChild(n)
-  }
+    const faceLandmarkerResult = faceLandmarker.detect(event.target)
 
-  const faceLandmarkerResult = faceLandmarker.detect(event.target)
-  console.log('faceLandmarkerResult', faceLandmarkerResult)
-
-  const canvas = document.createElement('canvas')
-  canvas.setAttribute('class', 'canvas')
-  canvas.setAttribute('width', event.target.naturalWidth + 'px')
-  canvas.setAttribute('height', event.target.naturalHeight + 'px')
-  canvas.style.left = '0px'
-  canvas.style.top = '0px'
-  canvas.style.width = `${event.target.width}px`
-  canvas.style.height = `${event.target.height}px`
-  event.target.parentNode.appendChild(canvas)
-  const ctx = canvas.getContext('2d')
-  const drawingUtils = new DrawingUtils(ctx)
-  for (const landmarks of faceLandmarkerResult.faceLandmarks) {
-    drawingUtils.drawConnectors(
-      landmarks,
-      FaceLandmarker.FACE_LANDMARKS_TESSELATION,
-      { color: '#C0C0C070', lineWidth: 1 },
-    )
-    drawingUtils.drawConnectors(
-      landmarks,
-      FaceLandmarker.FACE_LANDMARKS_RIGHT_EYE,
-      { color: '#FF3030' },
-    )
-    drawingUtils.drawConnectors(
-      landmarks,
-      FaceLandmarker.FACE_LANDMARKS_RIGHT_EYEBROW,
-      { color: '#FF3030' },
-    )
-    drawingUtils.drawConnectors(
-      landmarks,
-      FaceLandmarker.FACE_LANDMARKS_LEFT_EYE,
-      { color: '#30FF30' },
-    )
-    drawingUtils.drawConnectors(
-      landmarks,
-      FaceLandmarker.FACE_LANDMARKS_LEFT_EYEBROW,
-      { color: '#30FF30' },
-    )
-    drawingUtils.drawConnectors(
-      landmarks,
-      FaceLandmarker.FACE_LANDMARKS_FACE_OVAL,
-      { color: '#E0E0E0' },
-    )
-    drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LIPS, {
-      color: '#E0E0E0',
-    })
-    drawingUtils.drawConnectors(
-      landmarks,
-      FaceLandmarker.FACE_LANDMARKS_RIGHT_IRIS,
-      { color: '#FF3030' },
-    )
-    drawingUtils.drawConnectors(
-      landmarks,
-      FaceLandmarker.FACE_LANDMARKS_LEFT_IRIS,
-      { color: '#30FF30' },
-    )
+    const canvas = document.createElement('canvas')
+    canvas.setAttribute('class', 'canvas')
+    canvas.setAttribute('width', event.target.naturalWidth + 'px')
+    canvas.setAttribute('height', event.target.naturalHeight + 'px')
+    canvas.style.left = '0px'
+    canvas.style.top = '0px'
+    canvas.style.width = `${event.target.width}px`
+    canvas.style.height = `${event.target.height}px`
+    event.target.parentNode.appendChild(canvas)
+    const ctx = canvas.getContext('2d')
+    const drawingUtils = new DrawingUtils(ctx)
+    for (const landmarks of faceLandmarkerResult.faceLandmarks) {
+      drawingUtils.drawConnectors(
+        landmarks,
+        FaceLandmarker.FACE_LANDMARKS_TESSELATION,
+        { color: '#C0C0C070', lineWidth: 1 },
+      )
+      drawingUtils.drawConnectors(
+        landmarks,
+        FaceLandmarker.FACE_LANDMARKS_RIGHT_EYE,
+        { color: '#FF3030' },
+      )
+      drawingUtils.drawConnectors(
+        landmarks,
+        FaceLandmarker.FACE_LANDMARKS_RIGHT_EYEBROW,
+        { color: '#FF3030' },
+      )
+      drawingUtils.drawConnectors(
+        landmarks,
+        FaceLandmarker.FACE_LANDMARKS_LEFT_EYE,
+        { color: '#30FF30' },
+      )
+      drawingUtils.drawConnectors(
+        landmarks,
+        FaceLandmarker.FACE_LANDMARKS_LEFT_EYEBROW,
+        { color: '#30FF30' },
+      )
+      drawingUtils.drawConnectors(
+        landmarks,
+        FaceLandmarker.FACE_LANDMARKS_FACE_OVAL,
+        { color: '#E0E0E0' },
+      )
+      drawingUtils.drawConnectors(
+        landmarks,
+        FaceLandmarker.FACE_LANDMARKS_LIPS,
+        {
+          color: '#E0E0E0',
+        },
+      )
+      drawingUtils.drawConnectors(
+        landmarks,
+        FaceLandmarker.FACE_LANDMARKS_RIGHT_IRIS,
+        { color: '#FF3030' },
+      )
+      drawingUtils.drawConnectors(
+        landmarks,
+        FaceLandmarker.FACE_LANDMARKS_LEFT_IRIS,
+        { color: '#30FF30' },
+      )
+    }
+    drawMasking(faceLandmarkerResult.faceBlendshapes)
   }
-  drawMasking(faceLandmarkerResult.faceBlendshapes)
+  catch (err) {
+    console.info('ERR CLOSE CAM')
+    console.error(err)
+  }
 }
 
 async function init() {
-  const filesetResolver = await FilesetResolver.forVisionTasks(
-    '/tasks-vision/wasm/',
-  )
+  try {
+    const filesetResolver = await FilesetResolver.forVisionTasks(
+      '/tasks-vision/wasm/',
+    )
 
-  faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
-    baseOptions: {
-      modelAssetPath: `/models/face_landmarker.task`,
-      delegate: 'GPU',
-    },
-    outputFaceBlendshapes: true,
-    runningMode,
-    numFaces: 1,
-  })
+    faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
+      baseOptions: {
+        modelAssetPath: `/models/face_landmarker.task`,
+        delegate: 'GPU',
+      },
+      outputFaceBlendshapes: true,
+      runningMode,
+      numFaces: 1,
+    })
+  }
+  catch (err) {
+    console.info('ERR INIT')
+    console.error(err)
+  }
 }
 
 onMounted(() => {

@@ -106,8 +106,8 @@ function displayImageDetections(result, resultElement) {
         + detection.boundingBox.width * ratio
         + 'px;'
         + 'height: '
-      + detection.boundingBox.height * ratio
-      + 'px;'
+        + detection.boundingBox.height * ratio
+        + 'px;'
     resultElement.parentNode.appendChild(highlighter)
     resultElement.parentNode.appendChild(p)
   }
@@ -215,9 +215,9 @@ function displayVideoDetections(result) {
         + 'width: '
         + (detection.boundingBox.width - 10)
         + 'px;'
-      + 'height: '
-      + detection.boundingBox.height
-      + 'px;'
+        + 'height: '
+        + detection.boundingBox.height
+        + 'px;'
     liveView.appendChild(highlighter)
     liveView.appendChild(p)
     // Store drawn objects in memory so they are queued to delete at next call.
