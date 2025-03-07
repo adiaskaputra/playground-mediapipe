@@ -65,7 +65,6 @@ async function runMachine() {
       results = faceLandmarker.detectForVideo(RefVideo.value, startTimeMs)
     }
 
-    console.log(results)
     if (results.faceLandmarks) {
       for (const landmarks of results.faceLandmarks) {
         drawingUtils.drawConnectors(

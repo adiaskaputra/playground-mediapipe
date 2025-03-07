@@ -22,7 +22,6 @@ const loading = ref(false)
 const videoHeight = '360px'
 const videoWidth = '480px'
 
-let children: any = []
 let lastVideoTime = -1
 let results = undefined
 
@@ -106,7 +105,6 @@ async function closeCam() {
     })
 
     nextTick(() => {
-      children = []
       isCameraLive.value = false
       isInProgressStopFaceDetection.value = false
       isRenderCamera.value = false

@@ -33,8 +33,6 @@ async function runMachine() {
     const imageEmbedderResult0 = imageEmbedder.embed(RefImage1.value)
     const imageEmbedderResult1 = imageEmbedder.embed(RefImage2.value)
 
-    console.log(imageEmbedderResult0)
-
     const _similarity = ImageEmbedder.cosineSimilarity(
       imageEmbedderResult0.embeddings[0],
       imageEmbedderResult1.embeddings[0],
@@ -75,17 +73,17 @@ onMounted(() => {
 <template>
   <div
     ref="RefContent"
-    class="g-page__content g-page__content--loading flex flex-wrap justify-center items-start gap-6"
+    class="g-page__content g-page__content--loading flex flex-wrap items-start justify-center gap-6"
   >
-    <div class="text-center flex-1">
+    <div class="flex-1 text-center">
       <UButton size="lg" class="mb-10" @click.stop="runMachine">Compare</UButton>
       <div class="img-container">
         <div>
-          <div class="font-bold mb-2">Image 1</div>
+          <div class="mb-2 font-bold">Image 1</div>
           <img ref="RefImage1" :src="image1" crossorigin="anonymous" />
         </div>
         <div>
-          <div class="font-bold mb-2">Image 2</div>
+          <div class="mb-2 font-bold">Image 2</div>
           <img ref="RefImage2" :src="image2" crossorigin="anonymous" />
         </div>
       </div>

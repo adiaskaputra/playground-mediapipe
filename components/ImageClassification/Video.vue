@@ -169,7 +169,7 @@ onBeforeRouteLeave(async () => {
         <a
           href="https://storage.googleapis.com/mediapipe-tasks/image_classifier/labels.txt"
           target="_blank"
-          class="cursor-pointer text-blue-600 hover:text-blue-700 hover:font-bold"
+          class="cursor-pointer text-blue-600 hover:font-bold hover:text-blue-700"
           >Supported label</a>
         <div class="mt-8">
           <p ref="RefPredict"></p>

@@ -38,8 +38,8 @@ function drawMasking(detections, resultElement) {
           + (detection.boundingBox.width * ratio - 10)
           + 'px;'
           + 'hight: '
-        + 20
-        + 'px;'
+          + 20
+          + 'px;'
 
       const highlighter = document.createElement('div')
       highlighter.setAttribute('class', 'highlighter')
@@ -54,8 +54,8 @@ function drawMasking(detections, resultElement) {
           + detection.boundingBox.width * ratio
           + 'px;'
           + 'height: '
-        + detection.boundingBox.height * ratio
-        + 'px;'
+          + detection.boundingBox.height * ratio
+          + 'px;'
 
       resultElement.parentNode.appendChild(highlighter)
       resultElement.parentNode.appendChild(p)
@@ -137,7 +137,7 @@ onMounted(() => {
     ref="RefContent"
     class="g-page__content g-page__content--loading flex justify-center gap-6"
   >
-    <div v-for="(item, i) in images" :key="`image-i`" class="flex-1 max-w-[50%]">
+    <div v-for="(item, i) in images" :key="`image-${i}`" class="max-w-[50%] flex-1">
       <div class="img-label">Click to get classification!</div>
       <div class="image-container" @click.stop="($event) => runMachine($event)">
         <img

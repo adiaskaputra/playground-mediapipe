@@ -13,6 +13,7 @@ const isCameraLive = ref(false)
 const isInProgressStopFaceDetection = ref(false)
 const loading = ref(false)
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let children: any = []
 let lastVideoTime = -1
 

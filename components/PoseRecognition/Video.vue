@@ -16,11 +16,22 @@ const isCameraLive = ref(false)
 const isInProgressStopFaceDetection = ref(false)
 const loading = ref(false)
 
-let children: any = []
 let lastVideoTime = -1
 
-function drawMasking(detections) {
+function drawMasking(result) {
   try {
+    const canvasCtx = RefCanvas.value.getContext('2d')
+    const drawingUtils = new DrawingUtils(canvasCtx)
+
+    canvasCtx.save()
+    canvasCtx.clearRect(0, 0, RefCanvas.value.width, RefCanvas.value.height)
+    for (const landmark of result.landmarks) {
+      drawingUtils.drawLandmarks(landmark, {
+        radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1),
+      })
+      drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS)
+    }
+    canvasCtx.restore()
   }
   catch (err) {
     console.info('ERR DRAW MASKING')
@@ -46,18 +57,7 @@ async function runMachine() {
       lastVideoTime = RefVideo.value.currentTime
 
       poseLandmarker.detectForVideo(RefVideo.value, startTimeMs, (result) => {
-        const canvasCtx = RefCanvas.value.getContext('2d')
-        const drawingUtils = new DrawingUtils(canvasCtx)
-
-        canvasCtx.save()
-        canvasCtx.clearRect(0, 0, RefCanvas.value.width, RefCanvas.value.height)
-        for (const landmark of result.landmarks) {
-          drawingUtils.drawLandmarks(landmark, {
-            radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1),
-          })
-          drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS)
-        }
-        canvasCtx.restore()
+        drawMasking(result)
       })
     }
 
@@ -84,7 +84,6 @@ async function closeCam() {
     })
 
     nextTick(() => {
-      children = []
       isCameraLive.value = false
       isInProgressStopFaceDetection.value = false
       isRenderCamera.value = false

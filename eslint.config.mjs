@@ -1,6 +1,8 @@
+import tailwind from 'eslint-plugin-tailwindcss'
 import withNuxt from './.nuxt/eslint.config.mjs'
 
 export default withNuxt([
+  ...tailwind.configs['flat/recommended'],
   {
     ignores: [
       // FOLDER
@@ -11,6 +13,7 @@ export default withNuxt([
       '.vscode',
       '.yarn',
       'dist',
+      'example',
       'node_modules',
       // FILE
       '*.log*',
@@ -25,13 +28,15 @@ export default withNuxt([
   },
   {
     rules: {
+      '@stylistic/indent-binary-ops': 'off',
       'camelcase': 'off',
       'dot-notation': 'off',
       'eslint-comments/no-unlimited-disable': 'off',
-      'max-len': ['error', { code: 240, tabWidth: 2, comments: 240 }],
+      'max-len': ['warn', { code: 140, tabWidth: 2, comments: 140 }],
       'no-console': [2, { allow: ['error', 'info', 'warn'] }],
       'no-lonely-if': 'off',
       'semi': [2, 'never'],
+      'tailwindcss/no-custom-classname': 'off',
       'vue/component-tags-order': [
         'error',
         {

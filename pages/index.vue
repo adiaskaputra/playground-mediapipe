@@ -9,7 +9,6 @@ function redirect(label: string | number, item: IMenu) {
     router.push(`/${label}/${item.path}`)
   }
   if (item.url) {
-    // @ts-ignore
     window.open(item.url, '_blank').focus()
   }
 }

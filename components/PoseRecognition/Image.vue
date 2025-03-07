@@ -106,7 +106,7 @@ onMounted(() => {
     ref="RefContent"
     class="g-page__content g-page__content--loading flex justify-center gap-6"
   >
-    <div v-for="(item, i) in images" :key="`image-i`" class="flex-1 max-w-[50%]">
+    <div v-for="(item, i) in images" :key="`image-${i}`" class="max-w-[50%] flex-1">
       <div class="img-label">Click to get classification!</div>
       <div class="image-container" @click.stop="($event) => runMachine($event)">
         <img

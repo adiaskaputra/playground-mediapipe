@@ -13,24 +13,26 @@ const isCameraLive = ref(false)
 const isInProgressStopFaceDetection = ref(false)
 const loading = ref(false)
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let children: any = []
 let lastVideoTime = -1
 
 function drawMasking(detections) {
-  for (const child of children) {
-    RefVidContainer.value.removeChild(child)
-  }
-  children.splice(0)
+  try {
+    for (const child of children) {
+      RefVidContainer.value.removeChild(child)
+    }
+    children.splice(0)
 
-  for (const detection of detections) {
-    const p = document.createElement('p')
-    p.innerText
-      = detection.categories[0].categoryName
+    for (const detection of detections) {
+      const p = document.createElement('p')
+      p.innerText
+        = detection.categories[0].categoryName
         + ' - with '
         + Math.round(parseFloat(detection.categories[0].score) * 100)
         + '% confidence.'
-    p.style
-      = 'left: '
+      p.style
+        = 'left: '
         + (RefVideo.value.offsetWidth
           - detection.boundingBox.width
           - detection.boundingBox.originX)
@@ -42,10 +44,10 @@ function drawMasking(detections) {
         + (detection.boundingBox.width - 10)
         + 'px;'
 
-    const highlighter = document.createElement('div')
-    highlighter.setAttribute('class', 'highlighter')
-    highlighter.style
-      = 'left: '
+      const highlighter = document.createElement('div')
+      highlighter.setAttribute('class', 'highlighter')
+      highlighter.style
+        = 'left: '
         + (RefVideo.value.offsetWidth
           - detection.boundingBox.width
           - detection.boundingBox.originX)
@@ -56,17 +58,16 @@ function drawMasking(detections) {
         + 'width: '
         + (detection.boundingBox.width - 10)
         + 'px;'
-      + 'height: '
-      + detection.boundingBox.height
-      + 'px;'
+        + 'height: '
+        + detection.boundingBox.height
+        + 'px;'
 
-    RefVidContainer.value.appendChild(highlighter)
-    RefVidContainer.value.appendChild(p)
+      RefVidContainer.value.appendChild(highlighter)
+      RefVidContainer.value.appendChild(p)
 
-    children.push(highlighter)
-    children.push(p)
-  }
-  try {
+      children.push(highlighter)
+      children.push(p)
+    }
   }
   catch (err) {
     console.info('ERR DRAW MASKING')
