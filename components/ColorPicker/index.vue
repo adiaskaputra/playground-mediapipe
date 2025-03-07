@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 // const colorList = shallowRef(["system", "light", "dark", "sepia"]);
-const colorList = shallowRef(["light", "sepia"]);
+const colorList = shallowRef(['light', 'sepia'])
 </script>
 
 <template>

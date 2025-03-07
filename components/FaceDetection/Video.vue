@@ -56,9 +56,9 @@ function drawMasking(detections) {
           + 'width: '
           + (detection.boundingBox.width - 10)
           + 'px;'
-        + 'height: '
-        + detection.boundingBox.height
-        + 'px;'
+          + 'height: '
+          + detection.boundingBox.height
+          + 'px;'
 
       RefVidContainer.value.appendChild(highlighter)
       RefVidContainer.value.appendChild(p)

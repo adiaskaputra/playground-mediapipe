@@ -37,8 +37,8 @@ function drawMasking(detections, resultElement) {
           + (detection.boundingBox.width * ratio - 10)
           + 'px;'
           + 'hight: '
-        + 20
-        + 'px;'
+          + 20
+          + 'px;'
 
       const highlighter = document.createElement('div')
       highlighter.setAttribute('class', 'highlighter')
@@ -53,8 +53,8 @@ function drawMasking(detections, resultElement) {
           + detection.boundingBox.width * ratio
           + 'px;'
           + 'height: '
-        + detection.boundingBox.height * ratio
-        + 'px;'
+          + detection.boundingBox.height * ratio
+          + 'px;'
 
       resultElement.parentNode.appendChild(highlighter)
       resultElement.parentNode.appendChild(p)

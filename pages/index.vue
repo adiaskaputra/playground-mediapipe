@@ -38,23 +38,27 @@ function redirect(label: string | number, item: IMenu) {
 
 <style lang="postcss" scoped>
 .menu {
-  @apply bg-gray-100 py-2 px-4 rounded;
+  @apply py-2 px-4 rounded;
+  @apply bg-zinc-100 hover:bg-zinc-200;
+  @apply border-solid border-[1px] border-zinc-200;
   @apply cursor-pointer;
-  @apply hover:bg-zinc-300;
   @apply text-center;
+
   &-container {
-    @apply flex w-[240px] flex-col justify-center gap-3;
-    @apply py-4 px-3 bg-zinc-200 rounded;
+    @apply w-[240px] p-4 bg-zinc-50 rounded;
+    @apply flex flex-col justify-center gap-3;
+
     &__label {
       @apply font-bold text-center capitalize;
-      @apply text-gray-700;
+      @apply text-zinc-800;
     }
   }
+
   &__label {
-    @apply text-gray-500;
+    @apply text-zinc-700;
   }
   &__caption {
-    @apply text-gray-400 text-sm;
+    @apply mt-1 text-sm italic text-zinc-500;
   }
 }
 </style>

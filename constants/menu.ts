@@ -4,10 +4,12 @@ export const MENU: { [key: string]: IMenu[] } = {
   detection: [
     {
       label: 'Face Detection',
+      caption: 'Detect faces',
       path: 'face-detection',
     },
     {
       label: 'Face Landmark',
+      caption: 'Detect face landmarks and facial expressions',
       path: 'face-landmark',
     },
     {
@@ -16,23 +18,25 @@ export const MENU: { [key: string]: IMenu[] } = {
       path: 'gesture-recognition',
     },
     {
-      label: 'Pose Landmark Detection',
-      path: 'pose-landmark-detection',
+      label: 'Pose Recognition',
+      caption: 'Recognize body gestures in real time.',
+      path: 'pose-recognition',
     },
     {
       label: 'Image Classification',
+      caption: 'Perform classification on images',
       path: 'image-classification',
     },
     {
       label: 'Object Detection',
+      caption: 'Representing an object identified',
       path: 'object-detection',
     },
-
   ],
   tool: [
     {
       label: 'Image Embedding',
-      caption: 'Image Similarity Checker',
+      caption: 'Comparing the similarity of two images',
       path: 'image-embedding',
     },
   ],
