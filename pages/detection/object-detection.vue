@@ -1,7 +1,8 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div class="face-detection"></div>
+  <div class="face-detection">
+    <ObjectDetectionVideo />
+    <ObjectDetectionImage />
+  </div>
 </template>
-
-<style lang="postcss" scoped></style>
