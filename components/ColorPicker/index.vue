@@ -1,10 +1,13 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+// const colorList = shallowRef(["system", "light", "dark", "sepia"]);
+const colorList = shallowRef(["light", "sepia"]);
+</script>
 
 <template>
   <div class="box">
     <div class="box__title">Change color mode</div>
     <div class="box__option">
-      <div v-for="color of ['system', 'light', 'dark', 'sepia']" :key="color">
+      <div v-for="color of colorList" :key="color">
         <component
           :is="`icon-color-mode-${color}`"
           class="cursor-pointer"

@@ -5,6 +5,7 @@ import {
   DrawingUtils,
 } from '@mediapipe/tasks-vision'
 
+const RefContent = ref()
 let gestureRecognizer
 let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
 
@@ -140,9 +141,11 @@ async function openCam() {
       RefVideo.value.srcObject = stream
       RefVideo.value.addEventListener('loadeddata', () => {
         isCameraLive.value = true
-        runMachine()
+        nextTick(() => {
+          runMachine()
+          loading.value = false
+        })
       })
-      loading.value = false
     })
     .catch((err) => {
       isCameraLive.value = false
@@ -157,11 +160,12 @@ async function init() {
     const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
     gestureRecognizer = await GestureRecognizer.createFromOptions(vision, {
       baseOptions: {
-        modelAssetPath: '/models/gesture_recognizer.task',
+        modelAssetPath: '/models/gesture-recognition.task',
         delegate: 'GPU',
       },
       runningMode,
     })
+    RefContent.value.classList.remove('g-page__content--loading')
   }
   catch (err) {
     console.info('ERR INIT')
@@ -181,8 +185,8 @@ onBeforeRouteLeave(async () => {
 </script>
 
 <template>
-  <div class="g-page__content">
-    <div class="flex justify-center pb-4">
+  <div ref="RefContent" class="g-page__content g-page__content--loading">
+    <div class="pb-4">
       <UButton
         v-if="isCameraLive"
         label="Close camera"

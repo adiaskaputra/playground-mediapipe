@@ -2,8 +2,8 @@
 
 <template>
   <div class="face-detection">
-    <HandGestureVideo />
-    <!-- <HandGestureImage /> -->
+    <GestureRecognitionVideo />
+    <GestureRecognitionImage />
   </div>
 </template>
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { FaceDetector, FilesetResolver } from '@mediapipe/tasks-vision'
 
+const RefContent = ref()
 let faceDetector
 let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
 
@@ -36,8 +37,8 @@ function drawMasking(detections, resultElement) {
           + (detection.boundingBox.width * ratio - 10)
           + 'px;'
           + 'hight: '
-          + 20
-          + 'px;'
+        + 20
+        + 'px;'
 
       const highlighter = document.createElement('div')
       highlighter.setAttribute('class', 'highlighter')
@@ -52,8 +53,8 @@ function drawMasking(detections, resultElement) {
           + detection.boundingBox.width * ratio
           + 'px;'
           + 'height: '
-          + detection.boundingBox.height * ratio
-          + 'px;'
+        + detection.boundingBox.height * ratio
+        + 'px;'
 
       resultElement.parentNode.appendChild(highlighter)
       resultElement.parentNode.appendChild(p)
@@ -75,8 +76,7 @@ function drawMasking(detections, resultElement) {
 
 async function runMachine(event) {
   try {
-    const highlighters
-      = event.target.parentNode.getElementsByClassName('highlighter')
+    const highlighters = event.target.parentNode.getElementsByClassName('highlighter')
     while (highlighters[0]) {
       highlighters[0].parentNode.removeChild(highlighters[0])
     }
@@ -86,8 +86,7 @@ async function runMachine(event) {
       infos[0].parentNode.removeChild(infos[0])
     }
 
-    const keyPoints
-      = event.target.parentNode.getElementsByClassName('key-point')
+    const keyPoints = event.target.parentNode.getElementsByClassName('key-point')
     while (keyPoints[0]) {
       keyPoints[0].parentNode.removeChild(keyPoints[0])
     }
@@ -116,11 +115,12 @@ async function init() {
     const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
     faceDetector = await FaceDetector.createFromOptions(vision, {
       baseOptions: {
-        modelAssetPath: '/models/blaze_face_short_range.tflite', // BlazeFace (short-range) float16
+        modelAssetPath: '/models/face-detection.tflite',
         delegate: 'GPU',
       },
       runningMode,
     })
+    RefContent.value.classList.remove('g-page__content--loading')
   }
   catch (err) {
     console.info('ERR INIT')
@@ -136,12 +136,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex justify-center gap-6 g-page__content">
-    <div
-      v-for="(item, i) in images"
-      :key="`image-i`"
-      class="flex-1 max-w-[50%]"
-    >
+  <div
+    ref="RefContent"
+    class="g-page__content g-page__content--loading flex justify-center gap-6"
+  >
+    <div v-for="(item, i) in images" :key="`image-i`" class="flex-1 max-w-[50%]">
       <div class="img-label">Click to get classification!</div>
       <div class="image-container" @click.stop="($event) => runMachine($event)">
         <img

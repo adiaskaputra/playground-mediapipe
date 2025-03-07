@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import {
-  FaceLandmarker,
-  FilesetResolver,
-  DrawingUtils,
-} from '@mediapipe/tasks-vision'
+import { FaceLandmarker, FilesetResolver, DrawingUtils } from '@mediapipe/tasks-vision'
 
+const RefContent = ref()
 const RefBlendShapes = ref()
 let faceLandmarker
 let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
@@ -18,7 +15,9 @@ function drawMasking(blendShapes) {
       htmlMaker += `
     <li class="blend-shapes__item">
       <span class="blend-shapes__label">${shape.displayName || shape.categoryName}</span>
-      <span class="blend-shapes__value" style="width: calc(${+shape.score * 100}% - 120px)">${(+shape.score).toFixed(4)}</span>
+      <span class="blend-shapes__value" style="width: calc(${
+        +shape.score * 100
+      }% - 120px)">${(+shape.score).toFixed(4)}</span>
     </li>
   `
     })
@@ -61,53 +60,36 @@ async function runMachine(event) {
     const ctx = canvas.getContext('2d')
     const drawingUtils = new DrawingUtils(ctx)
     for (const landmarks of faceLandmarkerResult.faceLandmarks) {
-      drawingUtils.drawConnectors(
-        landmarks,
-        FaceLandmarker.FACE_LANDMARKS_TESSELATION,
-        { color: '#C0C0C070', lineWidth: 1 },
-      )
-      drawingUtils.drawConnectors(
-        landmarks,
-        FaceLandmarker.FACE_LANDMARKS_RIGHT_EYE,
-        { color: '#FF3030' },
-      )
+      drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_TESSELATION, {
+        color: '#C0C0C070',
+        lineWidth: 1,
+      })
+      drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_RIGHT_EYE, {
+        color: '#FF3030',
+      })
       drawingUtils.drawConnectors(
         landmarks,
         FaceLandmarker.FACE_LANDMARKS_RIGHT_EYEBROW,
         { color: '#FF3030' },
       )
-      drawingUtils.drawConnectors(
-        landmarks,
-        FaceLandmarker.FACE_LANDMARKS_LEFT_EYE,
-        { color: '#30FF30' },
-      )
-      drawingUtils.drawConnectors(
-        landmarks,
-        FaceLandmarker.FACE_LANDMARKS_LEFT_EYEBROW,
-        { color: '#30FF30' },
-      )
-      drawingUtils.drawConnectors(
-        landmarks,
-        FaceLandmarker.FACE_LANDMARKS_FACE_OVAL,
-        { color: '#E0E0E0' },
-      )
-      drawingUtils.drawConnectors(
-        landmarks,
-        FaceLandmarker.FACE_LANDMARKS_LIPS,
-        {
-          color: '#E0E0E0',
-        },
-      )
-      drawingUtils.drawConnectors(
-        landmarks,
-        FaceLandmarker.FACE_LANDMARKS_RIGHT_IRIS,
-        { color: '#FF3030' },
-      )
-      drawingUtils.drawConnectors(
-        landmarks,
-        FaceLandmarker.FACE_LANDMARKS_LEFT_IRIS,
-        { color: '#30FF30' },
-      )
+      drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LEFT_EYE, {
+        color: '#30FF30',
+      })
+      drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LEFT_EYEBROW, {
+        color: '#30FF30',
+      })
+      drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_FACE_OVAL, {
+        color: '#E0E0E0',
+      })
+      drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LIPS, {
+        color: '#E0E0E0',
+      })
+      drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_RIGHT_IRIS, {
+        color: '#FF3030',
+      })
+      drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LEFT_IRIS, {
+        color: '#30FF30',
+      })
     }
     drawMasking(faceLandmarkerResult.faceBlendshapes)
   }
@@ -119,19 +101,17 @@ async function runMachine(event) {
 
 async function init() {
   try {
-    const filesetResolver = await FilesetResolver.forVisionTasks(
-      '/tasks-vision/wasm/',
-    )
-
+    const filesetResolver = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
     faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
       baseOptions: {
-        modelAssetPath: `/models/face_landmarker.task`,
+        modelAssetPath: `/models/face-landmark.task`,
         delegate: 'GPU',
       },
       outputFaceBlendshapes: true,
       runningMode,
       numFaces: 1,
     })
+    RefContent.value.classList.remove('g-page__content--loading')
   }
   catch (err) {
     console.info('ERR INIT')
@@ -147,7 +127,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex gap-6 g-page__content">
+  <div
+    ref="RefContent"
+    class="g-page__content g-page__content--loading flex flex-wrap gap-6"
+  >
     <div class="flex-1">
       <div class="img-label">Click the image to get classification!</div>
       <div class="image-container" @click.stop="($event) => runMachine($event)">

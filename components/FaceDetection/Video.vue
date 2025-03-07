@@ -4,6 +4,7 @@ import { FaceDetector, FilesetResolver } from '@mediapipe/tasks-vision'
 let faceDetector
 let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
 
+const RefContent = ref()
 const RefVidContainer = ref()
 const RefVideo = ref()
 
@@ -55,9 +56,9 @@ function drawMasking(detections) {
           + 'width: '
           + (detection.boundingBox.width - 10)
           + 'px;'
-          + 'height: '
-          + detection.boundingBox.height
-          + 'px;'
+        + 'height: '
+        + detection.boundingBox.height
+        + 'px;'
 
       RefVidContainer.value.appendChild(highlighter)
       RefVidContainer.value.appendChild(p)
@@ -69,9 +70,7 @@ function drawMasking(detections) {
         keypointEl.className = 'key-point'
         keypointEl.style.top = `${keypoint.y * RefVideo.value.offsetHeight - 3}px`
         keypointEl.style.left = `${
-          RefVideo.value.offsetWidth
-          - keypoint.x * RefVideo.value.offsetWidth
-          - 3
+          RefVideo.value.offsetWidth - keypoint.x * RefVideo.value.offsetWidth - 3
         }px`
         RefVidContainer.value.appendChild(keypointEl)
         children.push(keypointEl)
@@ -95,10 +94,8 @@ async function runMachine() {
 
     if (RefVideo.value.currentTime !== lastVideoTime) {
       lastVideoTime = RefVideo.value.currentTime
-      const detections = faceDetector.detectForVideo(
-        RefVideo.value,
-        startTimeMs,
-      ).detections
+      const detections = faceDetector.detectForVideo(RefVideo.value, startTimeMs)
+        .detections
       drawMasking(detections)
     }
     window.requestAnimationFrame(runMachine)
@@ -159,9 +156,11 @@ async function openCam() {
       RefVideo.value.srcObject = stream
       RefVideo.value.addEventListener('loadeddata', () => {
         isCameraLive.value = true
-        runMachine()
+        nextTick(() => {
+          runMachine()
+          loading.value = false
+        })
       })
-      loading.value = false
     })
     .catch((err) => {
       isCameraLive.value = false
@@ -176,11 +175,12 @@ async function init() {
     const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
     faceDetector = await FaceDetector.createFromOptions(vision, {
       baseOptions: {
-        modelAssetPath: '/models/blaze_face_short_range.tflite', // BlazeFace (short-range) float16
+        modelAssetPath: '/models/face-detection.tflite',
         delegate: 'GPU',
       },
       runningMode,
     })
+    RefContent.value.classList.remove('g-page__content--loading')
   }
   catch (err) {
     console.info('ERR INIT')
@@ -200,8 +200,8 @@ onBeforeRouteLeave(async () => {
 </script>
 
 <template>
-  <div class="g-page__content">
-    <div class="flex justify-center pb-4">
+  <div ref="RefContent" class="g-page__content g-page__content--loading">
+    <div class="pb-4">
       <UButton
         v-if="isCameraLive"
         label="Close camera"
@@ -209,12 +209,7 @@ onBeforeRouteLeave(async () => {
         :loading="loading"
         @click.stop="closeCam"
       />
-      <UButton
-        v-else
-        label="Open camera"
-        :loading="loading"
-        @click.stop="openCam"
-      />
+      <UButton v-else label="Open camera" :loading="loading" @click.stop="openCam" />
     </div>
     <div v-if="isRenderCamera" ref="RefVidContainer" class="video-container">
       <video ref="RefVideo" autoplay playsinline></video>

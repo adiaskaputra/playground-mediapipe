@@ -4,6 +4,7 @@ import { ImageClassifier, FilesetResolver } from '@mediapipe/tasks-vision'
 let imageClassifier
 let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
 
+const RefContent = ref()
 const RefVidContainer = ref()
 const RefVideo = ref()
 const RefPredict = ref()
@@ -103,9 +104,11 @@ async function openCam() {
       RefVideo.value.srcObject = stream
       RefVideo.value.addEventListener('loadeddata', () => {
         isCameraLive.value = true
-        runMachine()
+        nextTick(() => {
+          runMachine()
+          loading.value = false
+        })
       })
-      loading.value = false
     })
     .catch((err) => {
       isCameraLive.value = false
@@ -120,11 +123,12 @@ async function init() {
     const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
     imageClassifier = await ImageClassifier.createFromOptions(vision, {
       baseOptions: {
-        modelAssetPath: '/models/efficientnet_lite0.tflite', // float32
+        modelAssetPath: '/models/image-classifier.tflite',
         delegate: 'GPU',
       },
       runningMode,
     })
+    RefContent.value.classList.remove('g-page__content--loading')
   }
   catch (err) {
     console.info('ERR INIT')
@@ -144,36 +148,32 @@ onBeforeRouteLeave(async () => {
 </script>
 
 <template>
-  <div class="g-page__content flex justify-between items-end gap-6">
-    <div>
-      <div class="flex justify-center pb-4">
-        <UButton
-          v-if="isCameraLive"
-          label="Close camera"
-          color="red"
-          :loading="loading"
-          @click.stop="closeCam"
-        />
-        <UButton
-          v-else
-          label="Open camera"
-          :loading="loading"
-          @click.stop="openCam"
-        />
-      </div>
+  <div ref="RefContent" class="g-page__content g-page__content--loading">
+    <div class="pb-4">
+      <UButton
+        v-if="isCameraLive"
+        label="Close camera"
+        color="red"
+        :loading="loading"
+        @click.stop="closeCam"
+      />
+      <UButton v-else label="Open camera" :loading="loading" @click.stop="openCam" />
+    </div>
+
+    <div class="flex flex-wrap items-start gap-6">
       <div v-if="isRenderCamera" ref="RefVidContainer" class="video-container">
         <video ref="RefVideo" autoplay playsinline></video>
       </div>
-    </div>
-    <div>
-      <div class="font-bold">Model: efficientnet_lite0 (float32)</div>
-      <a
-        href="https://storage.googleapis.com/mediapipe-tasks/image_classifier/labels.txt"
-        target="_blank"
-        class="cursor-pointer text-blue-600 hover:text-blue-700 hover:font-bold"
-        >Supported label</a>
-      <div v-if="isCameraLive" class="mt-8">
-        <p ref="RefPredict"></p>
+      <div v-if="isCameraLive">
+        <div class="font-bold">Model: efficientnet_lite0 (float32)</div>
+        <a
+          href="https://storage.googleapis.com/mediapipe-tasks/image_classifier/labels.txt"
+          target="_blank"
+          class="cursor-pointer text-blue-600 hover:text-blue-700 hover:font-bold"
+          >Supported label</a>
+        <div class="mt-8">
+          <p ref="RefPredict"></p>
+        </div>
       </div>
     </div>
   </div>

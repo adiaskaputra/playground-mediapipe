@@ -1,14 +1,11 @@
 <script setup lang="ts">
-import {
-  FaceLandmarker,
-  FilesetResolver,
-  DrawingUtils,
-} from '@mediapipe/tasks-vision'
+import { FaceLandmarker, FilesetResolver, DrawingUtils } from '@mediapipe/tasks-vision'
 
 let faceLandmarker
 let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
 const videoWidth = 480
 
+const RefContent = ref()
 const RefVidContainer = ref()
 const RefVideo = ref()
 const RefCanvas = ref()
@@ -28,7 +25,9 @@ function drawMasking(blendShapes) {
       htmlMaker += `
     <li class="blend-shapes__item">
       <span class="blend-shapes__label">${shape.displayName || shape.categoryName}</span>
-      <span class="blend-shapes__value" style="width: calc(${+shape.score * 100}% - 120px)">${(+shape.score).toFixed(4)}</span>
+      <span class="blend-shapes__value" style="width: calc(${
+        +shape.score * 100
+      }% - 120px)">${(+shape.score).toFixed(4)}</span>
     </li>
   `
     })
@@ -65,6 +64,8 @@ async function runMachine() {
       lastVideoTime = RefVideo.value.currentTime
       results = faceLandmarker.detectForVideo(RefVideo.value, startTimeMs)
     }
+
+    console.log(results)
     if (results.faceLandmarks) {
       for (const landmarks of results.faceLandmarks) {
         drawingUtils.drawConnectors(
@@ -72,46 +73,34 @@ async function runMachine() {
           FaceLandmarker.FACE_LANDMARKS_TESSELATION,
           { color: '#C0C0C070', lineWidth: 1 },
         )
-        drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_RIGHT_EYE,
-          { color: '#FF3030' },
-        )
+        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_RIGHT_EYE, {
+          color: '#FF3030',
+        })
         drawingUtils.drawConnectors(
           landmarks,
           FaceLandmarker.FACE_LANDMARKS_RIGHT_EYEBROW,
           { color: '#FF3030' },
         )
-        drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_LEFT_EYE,
-          { color: '#30FF30' },
-        )
+        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LEFT_EYE, {
+          color: '#30FF30',
+        })
         drawingUtils.drawConnectors(
           landmarks,
           FaceLandmarker.FACE_LANDMARKS_LEFT_EYEBROW,
           { color: '#30FF30' },
         )
-        drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_FACE_OVAL,
-          { color: '#E0E0E0' },
-        )
-        drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_LIPS,
-          { color: '#E0E0E0' },
-        )
-        drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_RIGHT_IRIS,
-          { color: '#FF3030' },
-        )
-        drawingUtils.drawConnectors(
-          landmarks,
-          FaceLandmarker.FACE_LANDMARKS_LEFT_IRIS,
-          { color: '#30FF30' },
-        )
+        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_FACE_OVAL, {
+          color: '#E0E0E0',
+        })
+        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LIPS, {
+          color: '#E0E0E0',
+        })
+        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_RIGHT_IRIS, {
+          color: '#FF3030',
+        })
+        drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LEFT_IRIS, {
+          color: '#30FF30',
+        })
       }
     }
 
@@ -171,9 +160,13 @@ async function openCam() {
     .getUserMedia(constraints)
     .then((stream) => {
       RefVideo.value.srcObject = stream
-      RefVideo.value.addEventListener('loadeddata', runMachine)
-      isCameraLive.value = true
-      loading.value = false
+      RefVideo.value.addEventListener('loadeddata', () => {
+        isCameraLive.value = true
+        nextTick(() => {
+          runMachine()
+          loading.value = false
+        })
+      })
     })
     .catch((err) => {
       isCameraLive.value = false
@@ -184,19 +177,17 @@ async function openCam() {
 }
 async function init() {
   try {
-    const filesetResolver = await FilesetResolver.forVisionTasks(
-      '/tasks-vision/wasm/',
-    )
-
+    const filesetResolver = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
     faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
       baseOptions: {
-        modelAssetPath: `/models/face_landmarker.task`,
+        modelAssetPath: `/models/face-landmark.task`,
         delegate: 'GPU',
       },
       outputFaceBlendshapes: true,
       runningMode,
       numFaces: 1,
     })
+    RefContent.value.classList.remove('g-page__content--loading')
   }
   catch (err) {
     console.info('ERR INIT')
@@ -216,23 +207,18 @@ onBeforeRouteLeave(async () => {
 </script>
 
 <template>
-  <div class="flex gap-6 g-page__content">
-    <div class="flex-1">
-      <div class="flex justify-center pb-4">
-        <UButton
-          v-if="isCameraLive"
-          label="Close camera"
-          color="red"
-          :loading="loading"
-          @click.stop="closeCam()"
-        />
-        <UButton
-          v-else
-          label="Open camera"
-          :loading="loading"
-          @click.stop="openCam()"
-        />
-      </div>
+  <div ref="RefContent" class="g-page__content g-page__content--loading">
+    <UButton
+      v-if="isCameraLive"
+      label="Close camera"
+      color="red"
+      class="mb-4"
+      :loading="loading"
+      @click.stop="closeCam()"
+    />
+    <UButton v-else label="Open camera" :loading="loading" @click.stop="openCam()" />
+
+    <div class="flex flex-wrap gap-6">
       <div
         v-if="isRenderCamera"
         ref="RefVidContainer"
@@ -247,9 +233,9 @@ onBeforeRouteLeave(async () => {
           style="position: absolute; left: 0px; top: 0px"
         ></canvas>
       </div>
-    </div>
-    <div class="blend-shapes flex-1">
-      <ul ref="RefBlendShapes" class="blend-shapes-list"></ul>
+      <div v-if="isCameraLive" class="blend-shapes flex-1">
+        <ul ref="RefBlendShapes" class="blend-shapes-list"></ul>
+      </div>
     </div>
   </div>
 </template>

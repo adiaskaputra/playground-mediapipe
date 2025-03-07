@@ -5,6 +5,7 @@ import {
   DrawingUtils,
 } from '@mediapipe/tasks-vision'
 
+const RefContent = ref()
 let gestureRecognizer
 let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
 
@@ -100,11 +101,12 @@ async function init() {
     const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
     gestureRecognizer = await GestureRecognizer.createFromOptions(vision, {
       baseOptions: {
-        modelAssetPath: '/models/gesture_recognizer.task',
+        modelAssetPath: '/models/gesture-recognition.task',
         delegate: 'GPU',
       },
       runningMode,
     })
+    RefContent.value.classList.remove('g-page__content--loading')
   }
   catch (err) {
     console.info('ERR INIT')
@@ -120,7 +122,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex justify-center gap-6 g-page__content">
+  <div
+    ref="RefContent"
+    class="g-page__content g-page__content--loading flex flex-wrap justify-center gap-6"
+  >
     <div v-for="(item, i) in images" :key="`image-i`" class="flex-1 max-w-[50%]">
       <div class="img-label">Click to get classification!</div>
       <div class="image-container" @click.stop="($event) => runMachine($event)">
