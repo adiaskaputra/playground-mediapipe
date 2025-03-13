@@ -2,7 +2,7 @@
 import type { FaceDetector as FaceDetectorType } from '@mediapipe/tasks-vision'
 
 const props = defineProps<{
-  faceDetector: FaceDetectorType | undefined
+  detector: FaceDetectorType | undefined
   loadingModel: boolean
   runningMode: 'IMAGE' | 'VIDEO'
 }>()
@@ -103,7 +103,7 @@ function drawMasking(detections) {
 async function runMachine() {
   try {
     if (isInProgressStopFaceDetection.value) return
-    if (!props.faceDetector) {
+    if (!props.detector) {
       alert('Wait for face detector to load before clicking')
       return
     }
@@ -111,13 +111,13 @@ async function runMachine() {
     if (mode.value === 'IMAGE') {
       console.info('SETUP RUNNING MODE TO VIDEO')
       mode.value = 'VIDEO'
-      await props.faceDetector.setOptions({ runningMode: 'VIDEO' })
+      await props.detector.setOptions({ runningMode: 'VIDEO' })
     }
     const startTimeMs = performance.now()
 
     if (RefVideo.value.currentTime !== lastVideoTime) {
       lastVideoTime = RefVideo.value.currentTime
-      const detections = props.faceDetector.detectForVideo(RefVideo.value, startTimeMs)
+      const detections = props.detector.detectForVideo(RefVideo.value, startTimeMs)
         .detections
       drawMasking(detections)
     }
@@ -165,7 +165,7 @@ async function openCam() {
     alert('Camera still live.')
     return
   }
-  if (!props.faceDetector) {
+  if (!props.detector) {
     alert('Face Detector is still loading. Please try again..')
     return
   }

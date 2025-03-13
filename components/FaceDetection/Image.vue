@@ -2,7 +2,7 @@
 import type { FaceDetector as FaceDetectorType } from '@mediapipe/tasks-vision'
 
 const props = defineProps<{
-  faceDetector: FaceDetectorType | undefined
+  detector: FaceDetectorType | undefined
   loadingModel: boolean
   runningMode: 'IMAGE' | 'VIDEO'
 }>()
@@ -108,7 +108,7 @@ async function runMachine(event) {
       keyPoints[0].parentNode.removeChild(keyPoints[0])
     }
 
-    if (!props.faceDetector) {
+    if (!props.detector) {
       alert('Wait for face detector to load before clicking')
       return
     }
@@ -116,11 +116,11 @@ async function runMachine(event) {
     if (mode.value === 'VIDEO') {
       console.info('SETUP RUNNING MODE TO IMAGE')
       mode.value = 'IMAGE'
-      await props.faceDetector.setOptions({ runningMode: 'IMAGE' })
+      await props.detector.setOptions({ runningMode: 'IMAGE' })
     }
 
     // const ratio = event.target.height / event.target.naturalHeight;
-    const detections = props.faceDetector.detect(event.target).detections
+    const detections = props.detector.detect(event.target).detections
     drawMasking(detections, event.target)
   }
   catch (err) {

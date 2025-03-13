@@ -1,15 +1,15 @@
 import { FaceDetector, FilesetResolver } from '@mediapipe/tasks-vision'
 
-export const useMediaPipe = () => {
+export const useFaceDetection = () => {
   const runningMode = ref<'IMAGE' | 'VIDEO'>('IMAGE')
   const loadingModel = ref(false)
-  const faceDetector = shallowRef<FaceDetector>()
+  const detector = shallowRef<FaceDetector>()
 
-  const initMediaPipe = async () => {
+  const loadModel = async () => {
     try {
       loadingModel.value = true
       const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
-      faceDetector.value = await FaceDetector.createFromOptions(vision, {
+      detector.value = await FaceDetector.createFromOptions(vision, {
         baseOptions: {
           modelAssetPath: '/models/face-detection.tflite',
           delegate: 'GPU',
@@ -26,14 +26,14 @@ export const useMediaPipe = () => {
   }
 
   onMounted(async () => {
-    if (!faceDetector.value) {
-      await initMediaPipe()
+    if (!detector.value) {
+      await loadModel()
     }
   })
 
   return {
     runningMode,
     loadingModel,
-    faceDetector,
+    detector,
   }
 }

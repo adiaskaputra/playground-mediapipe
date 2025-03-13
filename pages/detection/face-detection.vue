@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { loadingModel, runningMode, faceDetector } = useMediaPipe()
+const { loadingModel, runningMode, detector } = useFaceDetection()
 </script>
 
 <template>
@@ -7,12 +7,12 @@ const { loadingModel, runningMode, faceDetector } = useMediaPipe()
     <FaceDetectionVideo
       v-model:running-mode="runningMode"
       :loading-model="loadingModel"
-      :face-detector="faceDetector"
+      :detector="detector"
     />
     <FaceDetectionImage
       v-model:running-mode="runningMode"
       :loading-model="loadingModel"
-      :face-detector="faceDetector"
+      :detector="detector"
     />
   </div>
 </template>
