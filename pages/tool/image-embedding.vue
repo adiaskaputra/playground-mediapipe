@@ -1,8 +1,14 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const { loadingModel, runningMode, detector } = useImageEmbedding()
+</script>
 
 <template>
   <div class="face-detection">
-    <ImageEmbeddingImage />
+    <ImageEmbeddingImage
+      v-model:running-mode="runningMode"
+      :loading-model="loadingModel"
+      :detector="detector"
+    />
   </div>
 </template>
 

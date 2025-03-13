@@ -1,37 +1,52 @@
 <script setup lang="ts">
-import { ImageEmbedder, FilesetResolver } from '@mediapipe/tasks-vision'
+import { ImageEmbedder } from '@mediapipe/tasks-vision'
 
-let imageEmbedder
-let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
+const props = defineProps<{
+  detector: ImageEmbedder | undefined
+  loadingModel: boolean
+  runningMode: 'IMAGE' | 'VIDEO'
+}>()
+
+const emits = defineEmits<{
+  (event: 'update:runningMode', value: 'IMAGE' | 'VIDEO'): void
+}>()
+
+const mode = computed({
+  get() {
+    return props.runningMode
+  },
+  set(e) {
+    emits('update:runningMode', e)
+  },
+})
 
 const RefContent = ref()
 const RefImage1 = ref()
 const RefImage2 = ref()
+const similarity = ref(0)
 
 const image1 = ref(
   'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThNqcZJPySuBlvmNxbmxCpIlJwJeoiFXApwNd0lVHWLjNTKfyGqEaQvVBgUZ3uBr5_MSg&usqp=CAU',
 )
 
 const image2 = ref(
-  'https://yt3.googleusercontent.com/8SwDqiFsi_u-0UQ74a8wHqPsAYtyGwg6ERrAdCn2PexWR14D348uZcfmfnbZl4KXuKqaO2Ui_Q=s900-c-k-c0x00ffffff-no-rj',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThNqcZJPySuBlvmNxbmxCpIlJwJeoiFXApwNd0lVHWLjNTKfyGqEaQvVBgUZ3uBr5_MSg&usqp=CAU',
 )
-
-const similarity = ref(0)
 
 async function runMachine() {
   try {
-    if (!imageEmbedder) {
-      alert('Wait for objectDetector to load before clicking')
+    if (!props.detector) {
+      alert('Wait for image embedding to load before clicking')
       return
     }
 
-    if (runningMode === 'VIDEO') {
-      runningMode = 'IMAGE'
-      await imageEmbedder.setOptions({ runningMode: runningMode })
+    if (mode.value === 'VIDEO') {
+      mode.value = 'IMAGE'
+      await props.detector.setOptions({ runningMode: 'IMAGE' })
     }
 
-    const imageEmbedderResult0 = imageEmbedder.embed(RefImage1.value)
-    const imageEmbedderResult1 = imageEmbedder.embed(RefImage2.value)
+    const imageEmbedderResult0 = props.detector.embed(RefImage1.value)
+    const imageEmbedderResult1 = props.detector.embed(RefImage2.value)
 
     const _similarity = ImageEmbedder.cosineSimilarity(
       imageEmbedderResult0.embeddings[0],
@@ -45,29 +60,14 @@ async function runMachine() {
   }
 }
 
-async function init() {
-  try {
-    const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
-    imageEmbedder = await ImageEmbedder.createFromOptions(vision, {
-      baseOptions: {
-        modelAssetPath: '/models/image-embedding.tflite',
-        delegate: 'GPU',
-      },
-      runningMode,
-    })
-    RefContent.value.classList.remove('g-page__content--loading')
-  }
-  catch (err) {
-    console.info('ERR INIT')
-    console.error(err)
-  }
-}
-
-onMounted(() => {
-  nextTick(() => {
-    init()
-  })
-})
+watch(
+  () => props.loadingModel,
+  (val) => {
+    if (!val) {
+      RefContent.value.classList.remove('g-page__content--loading')
+    }
+  },
+)
 </script>
 
 <template>
