@@ -1,8 +1,24 @@
 <script setup lang="ts">
-import { ImageClassifier, FilesetResolver } from '@mediapipe/tasks-vision'
+import type { ImageClassifier as ImageClassifierType } from '@mediapipe/tasks-vision'
 
-let imageClassifier
-let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
+const props = defineProps<{
+  detector: ImageClassifierType | undefined
+  loadingModel: boolean
+  runningMode: 'IMAGE' | 'VIDEO'
+}>()
+
+const emits = defineEmits<{
+  (event: 'update:runningMode', value: 'IMAGE' | 'VIDEO'): void
+}>()
+
+const mode = computed({
+  get() {
+    return props.runningMode
+  },
+  set(e) {
+    emits('update:runningMode', e)
+  },
+})
 
 const RefContent = ref()
 const RefVidContainer = ref()
@@ -20,16 +36,17 @@ const videoWidth = '480px'
 async function runMachine() {
   try {
     if (isInProgressStopFaceDetection.value) return
-    if (imageClassifier === undefined) {
+    if (!props.detector) {
+      alert('Wait for image classification to load before clicking!')
       return
     }
-    // if image mode is initialized, create a new classifier with video runningMode
-    if (runningMode === 'IMAGE') {
-      runningMode = 'VIDEO'
-      await imageClassifier.setOptions({ runningMode: 'VIDEO' })
+
+    if (mode.value === 'IMAGE') {
+      mode.value = 'VIDEO'
+      await props.detector.setOptions({ runningMode: 'VIDEO' })
     }
     const startTimeMs = performance.now()
-    const classificationResult = imageClassifier.classifyForVideo(
+    const classificationResult = props.detector.classifyForVideo(
       RefVideo.value,
       startTimeMs,
     )
@@ -42,10 +59,10 @@ async function runMachine() {
     RefPredict.value.className = 'webcamPredictions'
     RefPredict.value.innerText
       = 'Classification: '
-        + classifications[0].categories[0].categoryName
-        + '\n Confidence: '
-        + Math.round(parseFloat(classifications[0].categories[0].score) * 100)
-        + '%'
+      + classifications[0].categories[0].categoryName
+      + '\n Confidence: '
+      + Math.round(parseFloat(classifications[0].categories[0].score) * 100)
+      + '%'
 
     window.requestAnimationFrame(runMachine)
   }
@@ -90,7 +107,7 @@ async function openCam() {
     alert('Camera still live.')
     return
   }
-  if (!imageClassifier) {
+  if (!props.detector) {
     alert('Image Classifier is still loading. Please try again..')
     return
   }
@@ -118,29 +135,14 @@ async function openCam() {
     })
 }
 
-async function init() {
-  try {
-    const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
-    imageClassifier = await ImageClassifier.createFromOptions(vision, {
-      baseOptions: {
-        modelAssetPath: '/models/image-classification.tflite',
-        delegate: 'GPU',
-      },
-      runningMode,
-    })
-    RefContent.value.classList.remove('g-page__content--loading')
-  }
-  catch (err) {
-    console.info('ERR INIT')
-    console.error(err)
-  }
-}
-
-onMounted(() => {
-  nextTick(() => {
-    init()
-  })
-})
+watch(
+  () => props.loadingModel,
+  (val) => {
+    if (!val) {
+      RefContent.value.classList.remove('g-page__content--loading')
+    }
+  },
+)
 
 onBeforeRouteLeave(async () => {
   await closeCam()

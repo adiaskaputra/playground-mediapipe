@@ -1,8 +1,14 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const { loadingModel, runningMode, detector } = useImageClassification()
+</script>
 
 <template>
   <div class="face-detection">
-    <ImageClassificationVideo />
+    <ImageClassificationVideo
+      v-model:running-mode="runningMode"
+      :loading-model="loadingModel"
+      :detector="detector"
+    />
   </div>
 </template>
 
