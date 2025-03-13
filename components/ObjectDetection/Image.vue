@@ -1,9 +1,26 @@
 <script setup lang="ts">
-import { ObjectDetector, FilesetResolver } from '@mediapipe/tasks-vision'
+import type { ObjectDetector as ObjectDetectorType } from '@mediapipe/tasks-vision'
+
+const props = defineProps<{
+  detector: ObjectDetectorType | undefined
+  loadingModel: boolean
+  runningMode: 'IMAGE' | 'VIDEO'
+}>()
+
+const emits = defineEmits<{
+  (event: 'update:runningMode', value: 'IMAGE' | 'VIDEO'): void
+}>()
+
+const mode = computed({
+  get() {
+    return props.runningMode
+  },
+  set(e) {
+    emits('update:runningMode', e)
+  },
+})
 
 const RefContent = ref()
-let objectDetector
-let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
 
 const images = ref([
   {
@@ -24,38 +41,38 @@ function drawMasking(detections, resultElement) {
       p.setAttribute('class', 'info')
       p.innerText
         = 'Confidence: '
-          + Math.round(parseFloat(detection.categories[0].score) * 100)
-          + '% .'
+        + Math.round(parseFloat(detection.categories[0].score) * 100)
+        + '% .'
 
       p.style
         = 'left: '
-          + detection.boundingBox.originX * ratio
-          + 'px;'
-          + 'top: '
-          + (detection.boundingBox.originY * ratio - 30)
-          + 'px; '
-          + 'width: '
-          + (detection.boundingBox.width * ratio - 10)
-          + 'px;'
-          + 'hight: '
-          + 20
-          + 'px;'
+        + detection.boundingBox.originX * ratio
+        + 'px;'
+        + 'top: '
+        + (detection.boundingBox.originY * ratio - 30)
+        + 'px; '
+        + 'width: '
+        + (detection.boundingBox.width * ratio - 10)
+        + 'px;'
+        + 'hight: '
+        + 20
+        + 'px;'
 
       const highlighter = document.createElement('div')
       highlighter.setAttribute('class', 'highlighter')
       highlighter.style
         = 'left: '
-          + detection.boundingBox.originX * ratio
-          + 'px;'
-          + 'top: '
-          + detection.boundingBox.originY * ratio
-          + 'px;'
-          + 'width: '
-          + detection.boundingBox.width * ratio
-          + 'px;'
-          + 'height: '
-          + detection.boundingBox.height * ratio
-          + 'px;'
+        + detection.boundingBox.originX * ratio
+        + 'px;'
+        + 'top: '
+        + detection.boundingBox.originY * ratio
+        + 'px;'
+        + 'width: '
+        + detection.boundingBox.width * ratio
+        + 'px;'
+        + 'height: '
+        + detection.boundingBox.height * ratio
+        + 'px;'
 
       resultElement.parentNode.appendChild(highlighter)
       resultElement.parentNode.appendChild(p)
@@ -86,18 +103,18 @@ async function runMachine(event) {
       infos[0].parentNode.removeChild(infos[0])
     }
 
-    if (!objectDetector) {
-      alert('Object Detector is still loading. Please try again.')
+    if (!props.detector) {
+      alert('Object Detecttion is still loading. Please try again.')
       return
     }
 
-    if (runningMode === 'VIDEO') {
-      runningMode = 'IMAGE'
-      await objectDetector.setOptions({ runningMode: 'IMAGE' })
+    if (mode.value === 'VIDEO') {
+      mode.value = 'IMAGE'
+      await props.detector.setOptions({ runningMode: 'IMAGE' })
     }
 
     // const ratio = event.target.height / event.target.naturalHeight;
-    const res = objectDetector.detect(event.target)
+    const res = props.detector.detect(event.target)
     drawMasking(res.detections, event.target)
   }
   catch (err) {
@@ -106,30 +123,14 @@ async function runMachine(event) {
   }
 }
 
-async function init() {
-  try {
-    const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
-    objectDetector = await ObjectDetector.createFromOptions(vision, {
-      baseOptions: {
-        modelAssetPath: '/models/object-detection.tflite',
-        delegate: 'GPU',
-      },
-      runningMode,
-      scoreThreshold: 0.5,
-    })
-    RefContent.value.classList.remove('g-page__content--loading')
-  }
-  catch (err) {
-    console.info('ERR INIT')
-    console.error(err)
-  }
-}
-
-onMounted(() => {
-  nextTick(() => {
-    init()
-  })
-})
+watch(
+  () => props.loadingModel,
+  (val) => {
+    if (!val) {
+      RefContent.value.classList.remove('g-page__content--loading')
+    }
+  },
+)
 </script>
 
 <template>

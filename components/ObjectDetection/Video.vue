@@ -1,8 +1,24 @@
 <script setup lang="ts">
-import { ObjectDetector, FilesetResolver } from '@mediapipe/tasks-vision'
+import type { ObjectDetector as ObjectDetectorType } from '@mediapipe/tasks-vision'
 
-let objectDetector
-let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
+const props = defineProps<{
+  detector: ObjectDetectorType | undefined
+  loadingModel: boolean
+  runningMode: 'IMAGE' | 'VIDEO'
+}>()
+
+const emits = defineEmits<{
+  (event: 'update:runningMode', value: 'IMAGE' | 'VIDEO'): void
+}>()
+
+const mode = computed({
+  get() {
+    return props.runningMode
+  },
+  set(e) {
+    emits('update:runningMode', e)
+  },
+})
 
 const RefContent = ref()
 const RefVidContainer = ref()
@@ -78,17 +94,21 @@ function drawMasking(detections) {
 async function runMachine() {
   try {
     if (isInProgressStopFaceDetection.value) return
+    if (!props.detector) {
+      alert('Wait for object detector to load before clicking!')
+      return
+    }
 
-    if (runningMode === 'IMAGE') {
-      runningMode = 'VIDEO'
-      await objectDetector.setOptions({ runningMode: 'VIDEO' })
+    if (mode.value === 'IMAGE') {
+      mode.value = 'VIDEO'
+      await props.detector.setOptions({ runningMode: 'VIDEO' })
     }
 
     const startTimeMs = performance.now()
 
     if (RefVideo.value.currentTime !== lastVideoTime) {
       lastVideoTime = RefVideo.value.currentTime
-      const res = objectDetector.detectForVideo(RefVideo.value, startTimeMs)
+      const res = props.detector.detectForVideo(RefVideo.value, startTimeMs)
       drawMasking(res.detections)
     }
     window.requestAnimationFrame(runMachine)
@@ -135,7 +155,7 @@ async function openCam() {
     alert('Camera still live.')
     return
   }
-  if (!objectDetector) {
+  if (!props.detector) {
     alert('Object Detector is still loading. Please try again..')
     return
   }
@@ -163,30 +183,14 @@ async function openCam() {
     })
 }
 
-async function init() {
-  try {
-    const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
-    objectDetector = await ObjectDetector.createFromOptions(vision, {
-      baseOptions: {
-        modelAssetPath: '/models/object-detection.tflite',
-        delegate: 'GPU',
-      },
-      runningMode,
-      scoreThreshold: 0.5,
-    })
-    RefContent.value.classList.remove('g-page__content--loading')
-  }
-  catch (err) {
-    console.info('ERR INIT')
-    console.error(err)
-  }
-}
-
-onMounted(() => {
-  nextTick(() => {
-    init()
-  })
-})
+watch(
+  () => props.loadingModel,
+  (val) => {
+    if (!val) {
+      RefContent.value.classList.remove('g-page__content--loading')
+    }
+  },
+)
 
 onBeforeRouteLeave(async () => {
   await closeCam()
