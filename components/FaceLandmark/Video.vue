@@ -1,8 +1,25 @@
 <script setup lang="ts">
-import { FaceLandmarker, FilesetResolver, DrawingUtils } from '@mediapipe/tasks-vision'
+import { FaceLandmarker, DrawingUtils } from '@mediapipe/tasks-vision'
 
-let faceLandmarker
-let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
+const props = defineProps<{
+  detector: FaceLandmarker | undefined
+  loadingModel: boolean
+  runningMode: 'IMAGE' | 'VIDEO'
+}>()
+
+const emits = defineEmits<{
+  (event: 'update:runningMode', value: 'IMAGE' | 'VIDEO'): void
+}>()
+
+const mode = computed({
+  get() {
+    return props.runningMode
+  },
+  set(e) {
+    emits('update:runningMode', e)
+  },
+})
+
 const videoWidth = 480
 
 const RefContent = ref()
@@ -42,6 +59,11 @@ function drawMasking(blendShapes) {
 async function runMachine() {
   try {
     if (isInProgressStopFaceDetection.value) return
+    if (!props.detector) {
+      alert('Wait for face landmark to load before clicking!')
+      return
+    }
+
     let lastVideoTime = -1
     let results = undefined
     const canvasCtx = RefCanvas.value.getContext('2d')
@@ -54,15 +76,16 @@ async function runMachine() {
     RefCanvas.value.style.height = videoWidth * radio + 'px'
     RefCanvas.value.width = RefVideo.value.videoWidth
     RefCanvas.value.height = RefVideo.value.videoHeight
-    // Now let's start detecting the stream.
-    if (runningMode === 'IMAGE') {
-      runningMode = 'VIDEO'
-      await faceLandmarker.setOptions({ runningMode: runningMode })
+
+    if (mode.value === 'IMAGE') {
+      mode.value = 'VIDEO'
+      await props.detector.setOptions({ runningMode: 'VIDEO' })
     }
+
     const startTimeMs = performance.now()
     if (lastVideoTime !== RefVideo.value.currentTime) {
       lastVideoTime = RefVideo.value.currentTime
-      results = faceLandmarker.detectForVideo(RefVideo.value, startTimeMs)
+      results = props.detector.detectForVideo(RefVideo.value, startTimeMs)
     }
 
     if (results.faceLandmarks) {
@@ -147,8 +170,8 @@ async function openCam() {
     alert('Camera still live.')
     return
   }
-  if (!faceLandmarker) {
-    alert('Wait! faceLandmarker not loaded yet.')
+  if (!props.detector) {
+    alert('Wait! face landmark not loaded yet.')
     return
   }
 
@@ -174,31 +197,15 @@ async function openCam() {
       console.error(err)
     })
 }
-async function init() {
-  try {
-    const filesetResolver = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
-    faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
-      baseOptions: {
-        modelAssetPath: `/models/face-landmark.task`,
-        delegate: 'GPU',
-      },
-      outputFaceBlendshapes: true,
-      runningMode,
-      numFaces: 1,
-    })
-    RefContent.value.classList.remove('g-page__content--loading')
-  }
-  catch (err) {
-    console.info('ERR INIT')
-    console.error(err)
-  }
-}
 
-onMounted(() => {
-  nextTick(() => {
-    init()
-  })
-})
+watch(
+  () => props.loadingModel,
+  (val) => {
+    if (!val) {
+      RefContent.value.classList.remove('g-page__content--loading')
+    }
+  },
+)
 
 onBeforeRouteLeave(async () => {
   await closeCam()

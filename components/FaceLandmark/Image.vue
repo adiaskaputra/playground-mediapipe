@@ -1,10 +1,27 @@
 <script setup lang="ts">
-import { FaceLandmarker, FilesetResolver, DrawingUtils } from '@mediapipe/tasks-vision'
+import { FaceLandmarker, DrawingUtils } from '@mediapipe/tasks-vision'
+
+const props = defineProps<{
+  detector: FaceLandmarker | undefined
+  loadingModel: boolean
+  runningMode: 'IMAGE' | 'VIDEO'
+}>()
+
+const emits = defineEmits<{
+  (event: 'update:runningMode', value: 'IMAGE' | 'VIDEO'): void
+}>()
+
+const mode = computed({
+  get() {
+    return props.runningMode
+  },
+  set(e) {
+    emits('update:runningMode', e)
+  },
+})
 
 const RefContent = ref()
 const RefBlendShapes = ref()
-let faceLandmarker
-let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
 
 function drawMasking(blendShapes) {
   try {
@@ -31,13 +48,14 @@ function drawMasking(blendShapes) {
 
 async function runMachine(event) {
   try {
-    if (!faceLandmarker) {
-      alert('Wait for faceLandmarker to load before clicking!')
+    if (!props.detector) {
+      alert('Wait for face landmark to load before clicking!')
       return
     }
-    if (runningMode === 'VIDEO') {
-      runningMode = 'IMAGE'
-      await faceLandmarker.setOptions({ runningMode })
+
+    if (mode.value === 'VIDEO') {
+      mode.value = 'IMAGE'
+      await props.detector.setOptions({ runningMode: 'IMAGE' })
     }
 
     const allCanvas = event.target.parentNode.getElementsByClassName('canvas')
@@ -46,7 +64,7 @@ async function runMachine(event) {
       n.parentNode.removeChild(n)
     }
 
-    const faceLandmarkerResult = faceLandmarker.detect(event.target)
+    const result = props.detector.detect(event.target)
 
     const canvas = document.createElement('canvas')
     canvas.setAttribute('class', 'canvas')
@@ -59,7 +77,7 @@ async function runMachine(event) {
     event.target.parentNode.appendChild(canvas)
     const ctx = canvas.getContext('2d')
     const drawingUtils = new DrawingUtils(ctx)
-    for (const landmarks of faceLandmarkerResult.faceLandmarks) {
+    for (const landmarks of result.faceLandmarks) {
       drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_TESSELATION, {
         color: '#C0C0C070',
         lineWidth: 1,
@@ -91,7 +109,7 @@ async function runMachine(event) {
         color: '#30FF30',
       })
     }
-    drawMasking(faceLandmarkerResult.faceBlendshapes)
+    drawMasking(result.faceBlendshapes)
   }
   catch (err) {
     console.info('ERR CLOSE CAM')
@@ -99,31 +117,14 @@ async function runMachine(event) {
   }
 }
 
-async function init() {
-  try {
-    const filesetResolver = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
-    faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
-      baseOptions: {
-        modelAssetPath: `/models/face-landmark.task`,
-        delegate: 'GPU',
-      },
-      outputFaceBlendshapes: true,
-      runningMode,
-      numFaces: 1,
-    })
-    RefContent.value.classList.remove('g-page__content--loading')
-  }
-  catch (err) {
-    console.info('ERR INIT')
-    console.error(err)
-  }
-}
-
-onMounted(() => {
-  nextTick(() => {
-    init()
-  })
-})
+watch(
+  () => props.loadingModel,
+  (val) => {
+    if (!val) {
+      RefContent.value.classList.remove('g-page__content--loading')
+    }
+  },
+)
 </script>
 
 <template>
