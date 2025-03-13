@@ -1,8 +1,24 @@
 <script setup lang="ts">
-import { FaceDetector, FilesetResolver } from '@mediapipe/tasks-vision'
+import type { FaceDetector as FaceDetectorType } from '@mediapipe/tasks-vision'
 
-let faceDetector
-let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
+const props = defineProps<{
+  faceDetector: FaceDetectorType | undefined
+  loadingModel: boolean
+  runningMode: 'IMAGE' | 'VIDEO'
+}>()
+
+const emits = defineEmits<{
+  (event: 'update:runningMode', value: 'IMAGE' | 'VIDEO'): void
+}>()
+
+const mode = computed({
+  get() {
+    return props.runningMode
+  },
+  set(e) {
+    emits('update:runningMode', e)
+  },
+})
 
 const RefContent = ref()
 const RefVidContainer = ref()
@@ -28,38 +44,38 @@ function drawMasking(detections) {
       const p = document.createElement('p')
       p.innerText
         = 'Confidence: '
-          + Math.round(parseFloat(detection.categories[0].score) * 100)
-          + '% .'
+        + Math.round(parseFloat(detection.categories[0].score) * 100)
+        + '% .'
       p.style
         = 'left: '
-          + (RefVideo.value.offsetWidth
-            - detection.boundingBox.width
-            - detection.boundingBox.originX)
-          + 'px;'
-          + 'top: '
-          + (detection.boundingBox.originY - 30)
-          + 'px; '
-          + 'width: '
-          + (detection.boundingBox.width - 10)
-          + 'px;'
+        + (RefVideo.value.offsetWidth
+          - detection.boundingBox.width
+          - detection.boundingBox.originX)
+        + 'px;'
+        + 'top: '
+        + (detection.boundingBox.originY - 30)
+        + 'px; '
+        + 'width: '
+        + (detection.boundingBox.width - 10)
+        + 'px;'
 
       const highlighter = document.createElement('div')
       highlighter.setAttribute('class', 'highlighter')
       highlighter.style
         = 'left: '
-          + (RefVideo.value.offsetWidth
-            - detection.boundingBox.width
-            - detection.boundingBox.originX)
-          + 'px;'
-          + 'top: '
-          + detection.boundingBox.originY
-          + 'px;'
-          + 'width: '
-          + (detection.boundingBox.width - 10)
-          + 'px;'
-          + 'height: '
-          + detection.boundingBox.height
-          + 'px;'
+        + (RefVideo.value.offsetWidth
+          - detection.boundingBox.width
+          - detection.boundingBox.originX)
+        + 'px;'
+        + 'top: '
+        + detection.boundingBox.originY
+        + 'px;'
+        + 'width: '
+        + (detection.boundingBox.width - 10)
+        + 'px;'
+        + 'height: '
+        + detection.boundingBox.height
+        + 'px;'
 
       RefVidContainer.value.appendChild(highlighter)
       RefVidContainer.value.appendChild(p)
@@ -87,15 +103,21 @@ function drawMasking(detections) {
 async function runMachine() {
   try {
     if (isInProgressStopFaceDetection.value) return
-    if (runningMode === 'IMAGE') {
-      runningMode = 'VIDEO'
-      await faceDetector.setOptions({ runningMode: 'VIDEO' })
+    if (!props.faceDetector) {
+      alert('Wait for face detector to load before clicking')
+      return
+    }
+
+    if (mode.value === 'IMAGE') {
+      console.info('SETUP RUNNING MODE TO VIDEO')
+      mode.value = 'VIDEO'
+      await props.faceDetector.setOptions({ runningMode: 'VIDEO' })
     }
     const startTimeMs = performance.now()
 
     if (RefVideo.value.currentTime !== lastVideoTime) {
       lastVideoTime = RefVideo.value.currentTime
-      const detections = faceDetector.detectForVideo(RefVideo.value, startTimeMs)
+      const detections = props.faceDetector.detectForVideo(RefVideo.value, startTimeMs)
         .detections
       drawMasking(detections)
     }
@@ -143,7 +165,7 @@ async function openCam() {
     alert('Camera still live.')
     return
   }
-  if (!faceDetector) {
+  if (!props.faceDetector) {
     alert('Face Detector is still loading. Please try again..')
     return
   }
@@ -171,29 +193,14 @@ async function openCam() {
     })
 }
 
-async function init() {
-  try {
-    const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
-    faceDetector = await FaceDetector.createFromOptions(vision, {
-      baseOptions: {
-        modelAssetPath: '/models/face-detection.tflite',
-        delegate: 'GPU',
-      },
-      runningMode,
-    })
-    RefContent.value.classList.remove('g-page__content--loading')
-  }
-  catch (err) {
-    console.info('ERR INIT')
-    console.error(err)
-  }
-}
-
-onMounted(() => {
-  nextTick(() => {
-    init()
-  })
-})
+watch(
+  () => props.loadingModel,
+  (val) => {
+    if (!val) {
+      RefContent.value.classList.remove('g-page__content--loading')
+    }
+  },
+)
 
 onBeforeRouteLeave(async () => {
   await closeCam()

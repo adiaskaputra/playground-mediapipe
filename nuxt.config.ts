@@ -1,4 +1,5 @@
 import path from 'pathe'
+// @ NOTE: mirip dengan path di Node.js, tetapi lebih ringan dan mendukung ESM.
 
 // eslint-disable-next-line unicorn/prefer-module
 const tasksVisionDir = path.dirname(require.resolve('@mediapipe/tasks-vision'))

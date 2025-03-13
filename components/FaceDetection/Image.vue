@@ -1,9 +1,26 @@
 <script setup lang="ts">
-import { FaceDetector, FilesetResolver } from '@mediapipe/tasks-vision'
+import type { FaceDetector as FaceDetectorType } from '@mediapipe/tasks-vision'
+
+const props = defineProps<{
+  faceDetector: FaceDetectorType | undefined
+  loadingModel: boolean
+  runningMode: 'IMAGE' | 'VIDEO'
+}>()
+
+const emits = defineEmits<{
+  (event: 'update:runningMode', value: 'IMAGE' | 'VIDEO'): void
+}>()
+
+const mode = computed({
+  get() {
+    return props.runningMode
+  },
+  set(e) {
+    emits('update:runningMode', e)
+  },
+})
 
 const RefContent = ref()
-let faceDetector
-let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
 
 const images = ref([
   {
@@ -23,38 +40,38 @@ function drawMasking(detections, resultElement) {
       p.setAttribute('class', 'info')
       p.innerText
         = 'Confidence: '
-          + Math.round(parseFloat(detection.categories[0].score) * 100)
-          + '% .'
+        + Math.round(parseFloat(detection.categories[0].score) * 100)
+        + '% .'
 
       p.style
         = 'left: '
-          + detection.boundingBox.originX * ratio
-          + 'px;'
-          + 'top: '
-          + (detection.boundingBox.originY * ratio - 30)
-          + 'px; '
-          + 'width: '
-          + (detection.boundingBox.width * ratio - 10)
-          + 'px;'
-          + 'hight: '
-          + 20
-          + 'px;'
+        + detection.boundingBox.originX * ratio
+        + 'px;'
+        + 'top: '
+        + (detection.boundingBox.originY * ratio - 30)
+        + 'px; '
+        + 'width: '
+        + (detection.boundingBox.width * ratio - 10)
+        + 'px;'
+        + 'hight: '
+        + 20
+        + 'px;'
 
       const highlighter = document.createElement('div')
       highlighter.setAttribute('class', 'highlighter')
       highlighter.style
         = 'left: '
-          + detection.boundingBox.originX * ratio
-          + 'px;'
-          + 'top: '
-          + detection.boundingBox.originY * ratio
-          + 'px;'
-          + 'width: '
-          + detection.boundingBox.width * ratio
-          + 'px;'
-          + 'height: '
-          + detection.boundingBox.height * ratio
-          + 'px;'
+        + detection.boundingBox.originX * ratio
+        + 'px;'
+        + 'top: '
+        + detection.boundingBox.originY * ratio
+        + 'px;'
+        + 'width: '
+        + detection.boundingBox.width * ratio
+        + 'px;'
+        + 'height: '
+        + detection.boundingBox.height * ratio
+        + 'px;'
 
       resultElement.parentNode.appendChild(highlighter)
       resultElement.parentNode.appendChild(p)
@@ -91,17 +108,19 @@ async function runMachine(event) {
       keyPoints[0].parentNode.removeChild(keyPoints[0])
     }
 
-    if (!faceDetector) {
-      alert('Wait for objectDetector to load before clicking')
+    if (!props.faceDetector) {
+      alert('Wait for face detector to load before clicking')
       return
     }
-    if (runningMode === 'VIDEO') {
-      runningMode = 'IMAGE'
-      await faceDetector.setOptions({ runningMode: 'IMAGE' })
+
+    if (mode.value === 'VIDEO') {
+      console.info('SETUP RUNNING MODE TO IMAGE')
+      mode.value = 'IMAGE'
+      await props.faceDetector.setOptions({ runningMode: 'IMAGE' })
     }
 
     // const ratio = event.target.height / event.target.naturalHeight;
-    const detections = faceDetector.detect(event.target).detections
+    const detections = props.faceDetector.detect(event.target).detections
     drawMasking(detections, event.target)
   }
   catch (err) {
@@ -110,29 +129,14 @@ async function runMachine(event) {
   }
 }
 
-async function init() {
-  try {
-    const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
-    faceDetector = await FaceDetector.createFromOptions(vision, {
-      baseOptions: {
-        modelAssetPath: '/models/face-detection.tflite',
-        delegate: 'GPU',
-      },
-      runningMode,
-    })
-    RefContent.value.classList.remove('g-page__content--loading')
-  }
-  catch (err) {
-    console.info('ERR INIT')
-    console.error(err)
-  }
-}
-
-onMounted(() => {
-  nextTick(() => {
-    init()
-  })
-})
+watch(
+  () => props.loadingModel,
+  (val) => {
+    if (!val) {
+      RefContent.value.classList.remove('g-page__content--loading')
+    }
+  },
+)
 </script>
 
 <template>
