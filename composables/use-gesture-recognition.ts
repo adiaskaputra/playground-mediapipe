@@ -1,6 +1,7 @@
+import type { GestureRecognizerOptions as GestureRecognizerOptionsType } from '@mediapipe/tasks-vision'
 import { GestureRecognizer, FilesetResolver } from '@mediapipe/tasks-vision'
 
-export const useGestureRecognition = () => {
+export const useGestureRecognition = (config: GestureRecognizerOptionsType = {}) => {
   const runningMode = ref<'IMAGE' | 'VIDEO'>('IMAGE')
   const loadingModel = ref(false)
   const detector = shallowRef<GestureRecognizer>()
@@ -15,6 +16,7 @@ export const useGestureRecognition = () => {
           delegate: 'GPU',
         },
         runningMode: runningMode.value,
+        ...config,
       })
       loadingModel.value = false
     }

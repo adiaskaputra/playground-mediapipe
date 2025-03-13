@@ -1,5 +1,5 @@
-import { PoseLandmarker, FilesetResolver } from '@mediapipe/tasks-vision'
 import type { PoseLandmarkerOptions as PoseLandmarkerOptionsType } from '@mediapipe/tasks-vision'
+import { PoseLandmarker, FilesetResolver } from '@mediapipe/tasks-vision'
 
 export const usePoseRecognition = (config: PoseLandmarkerOptionsType = {}) => {
   const runningMode = ref<'IMAGE' | 'VIDEO'>('IMAGE')

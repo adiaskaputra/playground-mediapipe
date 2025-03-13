@@ -1,6 +1,7 @@
+import type { ObjectDetectorOptions as ObjectDetectorOptionsType } from '@mediapipe/tasks-vision'
 import { ObjectDetector, FilesetResolver } from '@mediapipe/tasks-vision'
 
-export const useObjectDetection = () => {
+export const useObjectDetection = (config: ObjectDetectorOptionsType) => {
   const runningMode = ref<'IMAGE' | 'VIDEO'>('IMAGE')
   const loadingModel = ref(false)
   const detector = shallowRef<ObjectDetector>()
@@ -16,6 +17,7 @@ export const useObjectDetection = () => {
         },
         runningMode: runningMode.value,
         scoreThreshold: 0.5,
+        ...config,
       })
       loadingModel.value = false
     }

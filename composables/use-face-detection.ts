@@ -1,6 +1,7 @@
+import type { FaceDetectorOptions as FaceDetectorOptionsType } from '@mediapipe/tasks-vision'
 import { FaceDetector, FilesetResolver } from '@mediapipe/tasks-vision'
 
-export const useFaceDetection = () => {
+export const useFaceDetection = (config: FaceDetectorOptionsType = {}) => {
   const runningMode = ref<'IMAGE' | 'VIDEO'>('IMAGE')
   const loadingModel = ref(false)
   const detector = shallowRef<FaceDetector>()
@@ -15,6 +16,7 @@ export const useFaceDetection = () => {
           delegate: 'GPU',
         },
         runningMode: runningMode.value,
+        ...config,
       })
       loadingModel.value = false
     }

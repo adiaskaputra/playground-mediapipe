@@ -1,6 +1,7 @@
+import type { ImageClassifierOptions as ImageClassifierOptionsType } from '@mediapipe/tasks-vision'
 import { ImageClassifier, FilesetResolver } from '@mediapipe/tasks-vision'
 
-export const useImageClassification = () => {
+export const useImageClassification = (config: ImageClassifierOptionsType = {}) => {
   const runningMode = ref<'IMAGE' | 'VIDEO'>('IMAGE')
   const loadingModel = ref(false)
   const detector = shallowRef<ImageClassifier>()
@@ -15,6 +16,7 @@ export const useImageClassification = () => {
           delegate: 'GPU',
         },
         runningMode: runningMode.value,
+        ...config,
       })
       loadingModel.value = false
     }

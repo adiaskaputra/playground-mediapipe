@@ -1,6 +1,7 @@
+import type { FaceDetectorOptions as FaceDetectorOptionsType } from '@mediapipe/tasks-vision'
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision'
 
-export const useFaceLandmark = () => {
+export const useFaceLandmark = (config: FaceDetectorOptionsType = {}) => {
   const runningMode = ref<'IMAGE' | 'VIDEO'>('IMAGE')
   const loadingModel = ref(false)
   const detector = shallowRef<FaceLandmarker>()
@@ -17,6 +18,7 @@ export const useFaceLandmark = () => {
         runningMode: runningMode.value,
         outputFaceBlendshapes: true,
         numFaces: 1,
+        ...config,
       })
       loadingModel.value = false
     }
