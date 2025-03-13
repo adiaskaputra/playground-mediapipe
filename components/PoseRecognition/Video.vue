@@ -1,8 +1,25 @@
 <script setup lang="ts">
-import { PoseLandmarker, FilesetResolver, DrawingUtils } from '@mediapipe/tasks-vision'
+import { PoseLandmarker, DrawingUtils } from '@mediapipe/tasks-vision'
 
-let poseLandmarker
-let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
+const props = defineProps<{
+  detector: PoseLandmarker | undefined
+  loadingModel: boolean
+  runningMode: 'IMAGE' | 'VIDEO'
+}>()
+
+const emits = defineEmits<{
+  (event: 'update:runningMode', value: 'IMAGE' | 'VIDEO'): void
+}>()
+
+const mode = computed({
+  get() {
+    return props.runningMode
+  },
+  set(e) {
+    emits('update:runningMode', e)
+  },
+})
+
 const videoHeight = '360px'
 const videoWidth = '480px'
 
@@ -42,21 +59,25 @@ function drawMasking(result) {
 async function runMachine() {
   try {
     if (isInProgressStopFaceDetection.value) return
+    if (!props.detector) {
+      alert('Wait for pose recognition to load before clicking!')
+      return
+    }
 
     RefCanvas.value.style.height = videoHeight
     RefVideo.value.style.height = videoHeight
     RefCanvas.value.style.width = videoWidth
     RefVideo.value.style.width = videoWidth
-    // Now let's start detecting the stream.
-    if (runningMode === 'IMAGE') {
-      runningMode = 'VIDEO'
-      await poseLandmarker.setOptions({ runningMode: 'VIDEO' })
+
+    if (mode.value === 'IMAGE') {
+      mode.value = 'VIDEO'
+      await props.detector.setOptions({ runningMode: 'VIDEO' })
     }
     const startTimeMs = performance.now()
     if (lastVideoTime !== RefVideo.value.currentTime) {
       lastVideoTime = RefVideo.value.currentTime
 
-      poseLandmarker.detectForVideo(RefVideo.value, startTimeMs, (result) => {
+      props.detector.detectForVideo(RefVideo.value, startTimeMs, (result) => {
         drawMasking(result)
       })
     }
@@ -104,8 +125,8 @@ async function openCam() {
     alert('Camera still live.')
     return
   }
-  if (!poseLandmarker) {
-    alert('Pose landmarker is still loading. Please try again..')
+  if (!props.detector) {
+    alert('Pose recognition is still loading. Please try again..')
     return
   }
 
@@ -132,30 +153,14 @@ async function openCam() {
     })
 }
 
-async function init() {
-  try {
-    const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
-    poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
-      baseOptions: {
-        modelAssetPath: '/models/pose-recognition.task',
-        delegate: 'GPU',
-      },
-      runningMode,
-      numPoses: 2,
-    })
-    RefContent.value.classList.remove('g-page__content--loading')
-  }
-  catch (err) {
-    console.info('ERR INIT')
-    console.error(err)
-  }
-}
-
-onMounted(() => {
-  nextTick(() => {
-    init()
-  })
-})
+watch(
+  () => props.loadingModel,
+  (val) => {
+    if (!val) {
+      RefContent.value.classList.remove('g-page__content--loading')
+    }
+  },
+)
 
 onBeforeRouteLeave(async () => {
   await closeCam()

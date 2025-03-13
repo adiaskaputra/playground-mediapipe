@@ -1,9 +1,26 @@
 <script setup lang="ts">
-import { PoseLandmarker, FilesetResolver, DrawingUtils } from '@mediapipe/tasks-vision'
+import { PoseLandmarker, DrawingUtils } from '@mediapipe/tasks-vision'
+
+const props = defineProps<{
+  detector: PoseLandmarker | undefined
+  loadingModel: boolean
+  runningMode: 'IMAGE' | 'VIDEO'
+}>()
+
+const emits = defineEmits<{
+  (event: 'update:runningMode', value: 'IMAGE' | 'VIDEO'): void
+}>()
+
+const mode = computed({
+  get() {
+    return props.runningMode
+  },
+  set(e) {
+    emits('update:runningMode', e)
+  },
+})
 
 const RefContent = ref()
-let poseLandmarker
-let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
 
 const images = ref([
   {
@@ -22,13 +39,13 @@ function drawMasking(event, result) {
     canvas.setAttribute('height', event.target.naturalHeight + 'px')
     canvas.style
       = 'left: 0px;'
-        + 'top: 0px;'
-        + 'width: '
-        + event.target.width
-        + 'px;'
-        + 'height: '
-        + event.target.height
-        + 'px;'
+      + 'top: 0px;'
+      + 'width: '
+      + event.target.width
+      + 'px;'
+      + 'height: '
+      + event.target.height
+      + 'px;'
 
     event.target.parentNode.appendChild(canvas)
     const canvasCtx = canvas.getContext('2d')
@@ -49,14 +66,14 @@ function drawMasking(event, result) {
 
 async function runMachine(event) {
   try {
-    if (!poseLandmarker) {
-      alert('Wait for poseLandmarker to load before clicking!')
+    if (!props.detector) {
+      alert('Wait for pose recognition to load before clicking!')
       return
     }
 
-    if (runningMode === 'VIDEO') {
-      runningMode = 'IMAGE'
-      await poseLandmarker.setOptions({ runningMode: 'IMAGE' })
+    if (mode.value === 'VIDEO') {
+      mode.value = 'IMAGE'
+      await props.detector.setOptions({ runningMode: 'IMAGE' })
     }
 
     const allCanvas = event.target.parentNode.getElementsByClassName('canvas')
@@ -65,7 +82,7 @@ async function runMachine(event) {
       n.parentNode.removeChild(n)
     }
 
-    poseLandmarker.detect(event.target, (result) => {
+    props.detector.detect(event.target, (result) => {
       drawMasking(event, result)
     })
   }
@@ -75,30 +92,14 @@ async function runMachine(event) {
   }
 }
 
-async function init() {
-  try {
-    const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
-    poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
-      baseOptions: {
-        modelAssetPath: '/models/pose-recognition.task',
-        delegate: 'GPU',
-      },
-      runningMode,
-      numPoses: 2,
-    })
-    RefContent.value.classList.remove('g-page__content--loading')
-  }
-  catch (err) {
-    console.info('ERR INIT')
-    console.error(err)
-  }
-}
-
-onMounted(() => {
-  nextTick(() => {
-    init()
-  })
-})
+watch(
+  () => props.loadingModel,
+  (val) => {
+    if (!val) {
+      RefContent.value.classList.remove('g-page__content--loading')
+    }
+  },
+)
 </script>
 
 <template>
