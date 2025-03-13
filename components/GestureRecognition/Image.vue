@@ -1,13 +1,26 @@
 <script setup lang="ts">
-import {
-  GestureRecognizer,
-  FilesetResolver,
-  DrawingUtils,
-} from '@mediapipe/tasks-vision'
+import { GestureRecognizer, DrawingUtils } from '@mediapipe/tasks-vision'
+
+const props = defineProps<{
+  detector: GestureRecognizer | undefined
+  loadingModel: boolean
+  runningMode: 'IMAGE' | 'VIDEO'
+}>()
+
+const emits = defineEmits<{
+  (event: 'update:runningMode', value: 'IMAGE' | 'VIDEO'): void
+}>()
+
+const mode = computed({
+  get() {
+    return props.runningMode
+  },
+  set(e) {
+    emits('update:runningMode', e)
+  },
+})
 
 const RefContent = ref()
-let gestureRecognizer
-let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
 
 const images = ref([
   {
@@ -30,25 +43,25 @@ function drawMasking(event, results) {
     p.innerText = `GestureRecognizer: ${categoryName}\n Confidence: ${categoryScore}%\n Handedness: ${handedness}`
     p.style
       = 'left: 0px;'
-        + 'top: '
-        + event.target.height
-        + 'px; '
-        + 'width: '
-        + (event.target.width - 10)
-        + 'px;'
+      + 'top: '
+      + event.target.height
+      + 'px; '
+      + 'width: '
+      + (event.target.width - 10)
+      + 'px;'
     const canvas = document.createElement('canvas')
     canvas.setAttribute('class', 'canvas')
     canvas.setAttribute('width', event.target.naturalWidth + 'px')
     canvas.setAttribute('height', event.target.naturalHeight + 'px')
     canvas.style
       = 'left: 0px;'
-        + 'top: 0px;'
-        + 'width: '
-        + event.target.width
-        + 'px;'
-        + 'height: '
-        + event.target.height
-        + 'px;'
+      + 'top: 0px;'
+      + 'width: '
+      + event.target.width
+      + 'px;'
+      + 'height: '
+      + event.target.height
+      + 'px;'
 
     event.target.parentNode.appendChild(canvas)
     const canvasCtx = canvas.getContext('2d')
@@ -72,13 +85,13 @@ function drawMasking(event, results) {
 
 async function runMachine(event) {
   try {
-    if (!gestureRecognizer) {
+    if (!props.detector) {
       alert('Please wait for gestureRecognizer to load')
       return
     }
-    if (runningMode === 'VIDEO') {
-      runningMode = 'IMAGE'
-      await gestureRecognizer.setOptions({ runningMode: 'IMAGE' })
+    if (mode.value === 'VIDEO') {
+      mode.value = 'IMAGE'
+      await props.detector.setOptions({ runningMode: 'IMAGE' })
     }
 
     // Remove all previous landmarks
@@ -87,7 +100,7 @@ async function runMachine(event) {
       const n = allCanvas[i]
       n.parentNode.removeChild(n)
     }
-    const results = gestureRecognizer.recognize(event.target)
+    const results = props.detector.recognize(event.target)
     drawMasking(event, results)
   }
   catch (err) {
@@ -96,29 +109,14 @@ async function runMachine(event) {
   }
 }
 
-async function init() {
-  try {
-    const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
-    gestureRecognizer = await GestureRecognizer.createFromOptions(vision, {
-      baseOptions: {
-        modelAssetPath: '/models/gesture-recognition.task',
-        delegate: 'GPU',
-      },
-      runningMode,
-    })
-    RefContent.value.classList.remove('g-page__content--loading')
-  }
-  catch (err) {
-    console.info('ERR INIT')
-    console.error(err)
-  }
-}
-
-onMounted(() => {
-  nextTick(() => {
-    init()
-  })
-})
+watch(
+  () => props.loadingModel,
+  (val) => {
+    if (!val) {
+      RefContent.value.classList.remove('g-page__content--loading')
+    }
+  },
+)
 </script>
 
 <template>

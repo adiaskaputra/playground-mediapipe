@@ -1,9 +1,19 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const { loadingModel, runningMode, detector } = useGestureRecognition()
+</script>
 
 <template>
   <div class="face-detection">
-    <GestureRecognitionVideo />
-    <GestureRecognitionImage />
+    <GestureRecognitionVideo
+      v-model:running-mode="runningMode"
+      :loading-model="loadingModel"
+      :detector="detector"
+    />
+    <GestureRecognitionImage
+      v-model:running-mode="runningMode"
+      :loading-model="loadingModel"
+      :detector="detector"
+    />
   </div>
 </template>
 

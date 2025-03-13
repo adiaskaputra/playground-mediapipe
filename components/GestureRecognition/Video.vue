@@ -1,14 +1,26 @@
 <script setup lang="ts">
-import {
-  GestureRecognizer,
-  FilesetResolver,
-  DrawingUtils,
-} from '@mediapipe/tasks-vision'
+import { GestureRecognizer, DrawingUtils } from '@mediapipe/tasks-vision'
+
+const props = defineProps<{
+  detector: GestureRecognizer | undefined
+  loadingModel: boolean
+  runningMode: 'IMAGE' | 'VIDEO'
+}>()
+
+const emits = defineEmits<{
+  (event: 'update:runningMode', value: 'IMAGE' | 'VIDEO'): void
+}>()
+
+const mode = computed({
+  get() {
+    return props.runningMode
+  },
+  set(e) {
+    emits('update:runningMode', e)
+  },
+})
 
 const RefContent = ref()
-let gestureRecognizer
-let runningMode: 'IMAGE' | 'VIDEO' = 'IMAGE'
-
 const RefVidContainer = ref()
 const RefVideo = ref()
 const RefCanvas = ref()
@@ -70,15 +82,20 @@ function drawMasking(results) {
 async function runMachine() {
   try {
     if (isInProgressStopFaceDetection.value) return
-    if (runningMode === 'IMAGE') {
-      runningMode = 'VIDEO'
-      await gestureRecognizer.setOptions({ runningMode: 'VIDEO' })
+    if (!props.detector) {
+      alert('Wait for gesture recognition to load before clicking!')
+      return
+    }
+
+    if (mode.value === 'IMAGE') {
+      mode.value = 'VIDEO'
+      await props.detector.setOptions({ runningMode: 'VIDEO' })
     }
 
     const nowInMs = Date.now()
     if (RefVideo.value.currentTime !== lastVideoTime) {
       lastVideoTime = RefVideo.value.currentTime
-      results = gestureRecognizer.recognizeForVideo(RefVideo.value, nowInMs)
+      results = props.detector.recognizeForVideo(RefVideo.value, nowInMs)
     }
 
     drawMasking(results)
@@ -125,7 +142,7 @@ async function openCam() {
     alert('Camera still live.')
     return
   }
-  if (!gestureRecognizer) {
+  if (!props.detector) {
     alert('Gesture Detector is still loading. Please try again..')
     return
   }
@@ -153,29 +170,14 @@ async function openCam() {
     })
 }
 
-async function init() {
-  try {
-    const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
-    gestureRecognizer = await GestureRecognizer.createFromOptions(vision, {
-      baseOptions: {
-        modelAssetPath: '/models/gesture-recognition.task',
-        delegate: 'GPU',
-      },
-      runningMode,
-    })
-    RefContent.value.classList.remove('g-page__content--loading')
-  }
-  catch (err) {
-    console.info('ERR INIT')
-    console.error(err)
-  }
-}
-
-onMounted(() => {
-  nextTick(() => {
-    init()
-  })
-})
+watch(
+  () => props.loadingModel,
+  (val) => {
+    if (!val) {
+      RefContent.value.classList.remove('g-page__content--loading')
+    }
+  },
+)
 
 onBeforeRouteLeave(async () => {
   await closeCam()
