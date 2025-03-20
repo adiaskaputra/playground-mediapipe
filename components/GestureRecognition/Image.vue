@@ -108,21 +108,15 @@ async function runMachine(event) {
     console.error(err)
   }
 }
-
-watch(
-  () => props.loadingModel,
-  (val) => {
-    if (!val) {
-      RefContent.value.classList.remove('g-page__content--loading')
-    }
-  },
-)
 </script>
 
 <template>
   <div
     ref="RefContent"
-    class="g-page__content g-page__content--loading flex flex-wrap justify-center gap-6"
+    class="g-page__content flex-wrap justify-center gap-6"
+    :class="{
+      'g-page__content--loading': loadingModel,
+    }"
   >
     <div v-for="(item, i) in images" :key="`image-${i}`" class="max-w-[50%] flex-1">
       <div class="img-label">Click to get classification!</div>

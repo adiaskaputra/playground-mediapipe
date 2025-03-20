@@ -59,21 +59,15 @@ async function runMachine() {
     console.error(err)
   }
 }
-
-watch(
-  () => props.loadingModel,
-  (val) => {
-    if (!val) {
-      RefContent.value.classList.remove('g-page__content--loading')
-    }
-  },
-)
 </script>
 
 <template>
   <div
     ref="RefContent"
-    class="g-page__content g-page__content--loading flex flex-wrap items-start justify-center gap-6"
+    class="g-page__content flex flex-wrap items-start justify-center gap-6"
+    :class="{
+      'g-page__content--loading': loadingModel,
+    }"
   >
     <div class="flex-1 text-center">
       <UButton size="lg" class="mb-10" @click.stop="runMachine">Compare</UButton>

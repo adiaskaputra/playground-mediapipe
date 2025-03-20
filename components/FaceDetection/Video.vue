@@ -195,22 +195,19 @@ async function openCam() {
     })
 }
 
-watch(
-  () => props.loadingModel,
-  (val) => {
-    if (!val) {
-      RefContent.value.classList.remove('g-page__content--loading')
-    }
-  },
-)
-
 onBeforeRouteLeave(async () => {
   await closeCam()
 })
 </script>
 
 <template>
-  <div ref="RefContent" class="g-page__content g-page__content--loading">
+  <div
+    ref="RefContent"
+    class="g-page__content"
+    :class="{
+      'g-page__content--loading': loadingModel,
+    }"
+  >
     <div class="pb-4">
       <UButton
         v-if="isCameraLive"

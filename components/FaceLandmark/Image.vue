@@ -116,21 +116,15 @@ async function runMachine(event) {
     console.error(err)
   }
 }
-
-watch(
-  () => props.loadingModel,
-  (val) => {
-    if (!val) {
-      RefContent.value.classList.remove('g-page__content--loading')
-    }
-  },
-)
 </script>
 
 <template>
   <div
     ref="RefContent"
-    class="g-page__content g-page__content--loading flex flex-wrap gap-6"
+    class="g-page__content flex flex-wrap gap-6"
+    :class="{
+      'g-page__content--loading': loadingModel,
+    }"
   >
     <div class="flex-1">
       <div class="img-label">Click the image to get classification!</div>
