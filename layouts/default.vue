@@ -56,12 +56,13 @@ function backToMenu() {
     @apply flex justify-between items-center;
     @apply rounded-lg py-6 px-16 mt-6;
     &__title {
-      @apply text-gray-700 font-bold text-[26px] text-center;
+      @apply text-gray-700 font-bold text-[20px] md:text-[26px] text-center;
       @apply capitalize;
     }
   }
   &__content {
     @apply h-full py-6 px-16;
+    @apply overflow-y-auto;
   }
 }
 </style>

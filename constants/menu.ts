@@ -1,6 +1,13 @@
 import type { IMenu } from '@/types/index'
 
 export const MENU: { [key: string]: IMenu[] } = {
+  landing: [
+    {
+      label: 'Face Detection',
+      caption: 'Plugin for landing soon',
+      path: 'face-detection',
+    },
+  ],
   detection: [
     {
       label: 'Face Detection',

@@ -115,6 +115,8 @@ async function runMachine() {
     }
     const startTimeMs = performance.now()
 
+    console.log('detector', props.detector)
+
     if (RefVideo.value.currentTime !== lastVideoTime) {
       lastVideoTime = RefVideo.value.currentTime
       const detections = props.detector.detectForVideo(RefVideo.value, startTimeMs)

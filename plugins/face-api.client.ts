@@ -1,12 +1,12 @@
 import type { FaceDetectorOptions as FaceDetectorOptionsType } from '@mediapipe/tasks-vision'
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision'
 
-export const useFaceLandmark = (config: FaceDetectorOptionsType = {}) => {
-  const runningMode = ref<'IMAGE' | 'VIDEO'>('IMAGE')
+export default defineNuxtPlugin((nuxtApp) => {
+  const runningMode = ref<'IMAGE' | 'VIDEO'>('VIDEO')
   const loadingModel = ref(false)
   const detector = shallowRef<FaceLandmarker>()
 
-  const loadModel = async () => {
+  const loadModel = async (config: FaceDetectorOptionsType = {}) => {
     try {
       loadingModel.value = true
       const vision = await FilesetResolver.forVisionTasks('/tasks-vision/wasm/')
@@ -28,23 +28,16 @@ export const useFaceLandmark = (config: FaceDetectorOptionsType = {}) => {
         ...config,
       })
       loadingModel.value = false
+      console.info('SUCCESS LOAD MODEL FACE API')
     }
     catch (err) {
       loadingModel.value = false
-      console.info('ERR LOAD MODEL FACE LANDMARK')
+      console.info('ERR LOAD MODEL FACE API')
       console.error(err)
     }
   }
 
-  onMounted(async () => {
-    if (!detector.value) {
-      await loadModel()
-    }
-  })
-
-  return {
-    runningMode,
-    loadingModel,
-    detector,
-  }
-}
+  nuxtApp.provide('loadingModel', loadingModel)
+  nuxtApp.provide('loadModel', loadModel)
+  nuxtApp.provide('faceDetector', detector)
+})

@@ -16,6 +16,8 @@ export const useFaceDetection = (config: FaceDetectorOptionsType = {}) => {
           delegate: 'GPU',
         },
         runningMode: runningMode.value,
+        minDetectionConfidence: 0.5,
+        minSuppressionThreshold: 0.3,
         ...config,
       })
       loadingModel.value = false

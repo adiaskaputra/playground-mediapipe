@@ -16,7 +16,7 @@ function redirect(label: string | number, item: IMenu) {
 
 <template>
   <div class="flex h-full flex-col items-center justify-center">
-    <div class="flex flex-wrap items-center justify-center gap-9">
+    <div class="flex h-full flex-wrap items-center justify-center gap-9">
       <div v-for="(items, label) in MENU" :key="`menu-${label}`" class="menu-container">
         <div class="menu-container__label">{{ label }}</div>
         <div
